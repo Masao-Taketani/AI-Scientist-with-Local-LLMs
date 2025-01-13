@@ -75,7 +75,7 @@ ONLY INCLUDE "I am done" IF YOU ARE MAKING NO MORE CHANGES."""
 # GENERATE IDEAS
 def generate_ideas(
         base_dir,
-        client,
+        platform,
         model,
         skip_generation=False,
         max_num_generations=20,
@@ -124,7 +124,7 @@ def generate_ideas(
                     prev_ideas_string=prev_ideas_string,
                     num_reflections=num_reflections,
                 ),
-                client=client,
+                platform=platform,
                 model=model,
                 system_message=idea_system_prompt,
                 msg_history=msg_history,
@@ -138,11 +138,11 @@ def generate_ideas(
             if num_reflections > 1:
                 for j in range(num_reflections - 1):
                     print(f"Iteration {j + 2}/{num_reflections}")
-                    text, msg_history = get_response_from_llm(
+                    text, msg_history = get_response_from_local_llm(
                         idea_reflection_prompt.format(
                             current_round=j + 2, num_reflections=num_reflections
                         ),
-                        client=client,
+                        platform=platform,
                         model=model,
                         system_message=idea_system_prompt,
                         msg_history=msg_history,

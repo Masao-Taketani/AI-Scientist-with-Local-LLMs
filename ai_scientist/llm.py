@@ -2,9 +2,11 @@ import json
 import os
 import re
 
-import backoff
+#import backoff
 from transformers import pipeline
 from transformers import set_seed
+
+import torch
 
 MAX_NUM_TOKENS = 4096
 
@@ -18,7 +20,7 @@ AVAILABLE_LLMS = [
 
 
 # Get N responses from a single message, used for ensembling.
-@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
+#@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
 def get_batch_responses_from_llm(
         msg,
         client,
@@ -171,7 +173,7 @@ def get_response_from_local_llm(
     return content, new_msg_history
 
 
-@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
+#@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
 def get_response_from_llm(
         msg,
         client,
