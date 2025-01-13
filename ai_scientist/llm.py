@@ -16,6 +16,8 @@ AVAILABLE_PLATFORMS = [
 
 AVAILABLE_LLMS = [
     "meta-llama/Llama-3.3-70B-Instruct",
+    "Qwen/Qwen2.5-72B-Instruct",
+    "Qwen/Qwen2.5-72B-Instruct-AWQ",
 ]
 
 
@@ -134,7 +136,8 @@ def get_response_from_local_llm(
         pipe = pipeline("text-generation", 
                         model=model, 
                         model_kwargs={"torch_dtype": torch.bfloat16}, 
-                        device="cuda")
+                        #device="cuda")
+                        device_map="auto")
 
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         prompt = pipe.tokenizer.apply_chat_template(
