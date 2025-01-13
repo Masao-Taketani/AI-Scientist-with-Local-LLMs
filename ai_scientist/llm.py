@@ -4,8 +4,13 @@ import re
 
 import backoff
 from transformers import pipeline
+from transformers import set_seed
 
 MAX_NUM_TOKENS = 4096
+
+AVAILABLE_PLATFORMS = [
+    "transformers",
+]
 
 AVAILABLE_LLMS = [
     "meta-llama/Llama-3.3-70B-Instruct",
@@ -130,7 +135,7 @@ def get_response_from_local_llm(
                         device="cuda")
 
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        prompt = pipeline.tokenizer.apply_chat_template(
+        prompt = pipe.tokenizer.apply_chat_template(
             new_msg_history, 
             tokenize=False, 
             add_generation_prompt=True
@@ -141,113 +146,15 @@ def get_response_from_local_llm(
         #    pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
         #]
 
+        set_seed(0)
         response = pipe(prompt,
                         do_sample=True,
                         temperature=temperature,
                         max_new_tokens=MAX_NUM_TOKENS,
-                        seed=0,
                         #eos_token_id=terminators,
         )
 
         content = response[0]["generated_text"][len(prompt):]
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
-
-    if "claude" in model:
-        new_msg_history = msg_history + [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": msg,
-                    }
-                ],
-            }
-        ]
-        response = client.messages.create(
-            model=model,
-            max_tokens=MAX_NUM_TOKENS,
-            temperature=temperature,
-            system=system_message,
-            messages=new_msg_history,
-        )
-        content = response.content[0].text
-        new_msg_history = new_msg_history + [
-            {
-                "role": "assistant",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": content,
-                    }
-                ],
-            }
-        ]
-    elif model in [
-        "gpt-4o-2024-05-13",
-        "gpt-4o-mini-2024-07-18",
-        "gpt-4o-2024-08-06",
-    ]:
-        new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_message},
-                *new_msg_history,
-            ],
-            temperature=temperature,
-            max_tokens=MAX_NUM_TOKENS,
-            n=1,
-            stop=None,
-            seed=0,
-        )
-        content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
-    elif model in ["o1-preview-2024-09-12", "o1-mini-2024-09-12"]:
-        new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "user", "content": system_message},
-                *new_msg_history,
-            ],
-            temperature=1,
-            max_completion_tokens=MAX_NUM_TOKENS,
-            n=1,
-            #stop=None,
-            seed=0,
-        )
-        content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
-    elif model == "deepseek-coder-v2-0724":
-        new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        response = client.chat.completions.create(
-            model="deepseek-coder",
-            messages=[
-                {"role": "system", "content": system_message},
-                *new_msg_history,
-            ],
-            temperature=temperature,
-            max_tokens=MAX_NUM_TOKENS,
-            n=1,
-            stop=None,
-        )
-        content = response.choices[0].message.content
-        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
-    elif model in ["meta-llama/llama-3.1-405b-instruct", "llama-3-1-405b-instruct"]:
-        new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        response = client.chat.completions.create(
-            model="meta-llama/llama-3.1-405b-instruct",
-            messages=[
-                {"role": "system", "content": system_message},
-                *new_msg_history,
-            ],
-            temperature=temperature,
-            max_tokens=MAX_NUM_TOKENS,
-            n=1,
-            stop=None,
-        )
-        content = response.choices[0].message.content
         new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     else:
         raise ValueError(f"Model {model} not supported.")
