@@ -9,7 +9,8 @@ import requests
 
 from ai_scientist.llm import get_response_from_local_llm, extract_json_between_markers, create_client, AVAILABLE_LLMS
 
-S2_API_KEY = os.getenv("S2_API_KEY")
+#S2_API_KEY = os.getenv("S2_API_KEY")
+CORE_API_KEY = os.getenv("CORE_API_KEY")
 
 idea_first_prompt = """{task_description}
 <experiment.py>
@@ -279,34 +280,62 @@ def on_backoff(details):
     )
 
 
+#@backoff.on_exception(
+#    backoff.expo, requests.exceptions.HTTPError, on_backoff=on_backoff
+#)
+#def search_for_papers(query, result_limit=10) -> Union[None, List[Dict]]:
+#    if not query:
+#        return None
+#    rsp = requests.get(
+#        "https://api.semanticscholar.org/graph/v1/paper/search",
+#        headers={"X-API-KEY": S2_API_KEY},
+#        params={
+#            "query": query,
+#            "limit": result_limit,
+#            "fields": "title,authors,venue,year,abstract,citationStyles,citationCount",
+#        },
+#    )
+#    print(f"Response Status Code: {rsp.status_code}")
+#    print(
+#        f"Response Content: {rsp.text[:500]}"
+#    )  # Print the first 500 characters of the response content
+#    rsp.raise_for_status()
+#    results = rsp.json()
+#    total = results["total"]
+#    time.sleep(1.0)
+#    if not total:
+#        return None
+#
+#    papers = results["data"]
+#    return papers
+
+
 @backoff.on_exception(
     backoff.expo, requests.exceptions.HTTPError, on_backoff=on_backoff
 )
 def search_for_papers(query, result_limit=10) -> Union[None, List[Dict]]:
-    if not query:
-        return None
-    rsp = requests.get(
-        "https://api.semanticscholar.org/graph/v1/paper/search",
-        headers={"X-API-KEY": S2_API_KEY},
-        params={
-            "query": query,
-            "limit": result_limit,
-            "fields": "title,authors,venue,year,abstract,citationStyles,citationCount",
-        },
-    )
-    print(f"Response Status Code: {rsp.status_code}")
-    print(
-        f"Response Content: {rsp.text[:500]}"
-    )  # Print the first 500 characters of the response content
-    rsp.raise_for_status()
-    results = rsp.json()
-    total = results["total"]
-    time.sleep(1.0)
-    if not total:
-        return None
-
-    papers = results["data"]
-    return papers
+   no_query = "No papers found. Skip."
+   if not query:
+       return no_query
+   headers = {"Authorization": f"Bearer {CORE_API_KEY}"}
+   payload = {"q": query, "limit": result_limit}
+   rsp = requests.post(
+       "https://api.core.ac.uk/v3/search/works", 
+       data=json.dumps(payload), 
+       headers=headers
+   )
+   print(f"Response Status Code: {rsp.status_code}")
+   print(
+       f"Response Content: {rsp.text[:500]}"
+   )  # Print the first 500 characters of the response content
+   rsp.raise_for_status()
+   results = rsp.json()
+   
+   total = results["totalHits"]
+   if total == 0:
+       return no_query
+   papers = results["results"]
+   return papers
 
 
 novelty_system_msg = """You are an ambitious AI PhD student who is looking to publish a paper that will contribute significantly to the field.
@@ -361,7 +390,7 @@ This JSON will be automatically parsed, so ensure the format is precise.'''
 def check_idea_novelty(
         ideas,
         base_dir,
-        client,
+        platform,
         model,
         max_num_iterations=10,
 ):
@@ -384,14 +413,14 @@ def check_idea_novelty(
 
         for j in range(max_num_iterations):
             try:
-                text, msg_history = get_response_from_llm(
+                text, msg_history = get_response_from_local_llm(
                     novelty_prompt.format(
                         current_round=j + 1,
                         num_rounds=max_num_iterations,
                         idea=idea,
                         last_query_results=papers_str,
                     ),
-                    client=client,
+                    platform=platform,
                     model=model,
                     system_message=novelty_system_msg.format(
                         num_rounds=max_num_iterations,

@@ -133,9 +133,10 @@ def get_response_from_local_llm(
         msg_history = []
 
     if 'transformers' in platform:
+        torch_dtype = torch.float16 if "awq" in model.lower() else torch.bfloat16
         pipe = pipeline("text-generation", 
                         model=model, 
-                        model_kwargs={"torch_dtype": torch.bfloat16}, 
+                        model_kwargs={"torch_dtype": torch_dtype}, 
                         #device="cuda")
                         device_map="auto")
 

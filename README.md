@@ -1,5 +1,5 @@
 # The AI Scientist with Local LLMs
-This repository is based on [The AI Scientists](), but this repository only supports local LLMs models. Thus, there are some merits.
+This repository is based on [The AI Scientists](https://github.com/SakanaAI/AI-Scientist), but this repository only supports local LLMs models. Thus, there are some merits.
 [merits]
 - Don't need to send your data to the closed LLMs.
 - Don't need to spend money on a pay-as-you-go APIs. It is especially good if your organization has enough GPUs for you to use. It is
