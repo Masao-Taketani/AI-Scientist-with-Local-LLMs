@@ -10,6 +10,7 @@ RUN pip install torch \
                 datasets \
                 backoff \
                 autoawq \
+                pyalex \
                 jupyter notebook
 
 RUN mkdir /work && chmod 777 /work
