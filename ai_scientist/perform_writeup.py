@@ -294,15 +294,15 @@ This JSON will be automatically parsed, so ensure the format is precise."""
 
 
 def get_citation_aider_prompt(
-        client, model, draft, current_round, total_rounds, engine="semanticscholar"
+        platform, model, draft, current_round, total_rounds, engine="semanticscholar"
 ) -> Tuple[Optional[str], bool]:
     msg_history = []
     try:
-        text, msg_history = get_response_from_llm(
+        text, msg_history = get_response_from_local_llm(
             citation_first_prompt.format(
                 draft=draft, current_round=current_round, total_rounds=total_rounds
             ),
-            client=client,
+            platform=platform,
             model=model,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
@@ -339,13 +339,13 @@ def get_citation_aider_prompt(
     papers_str = "\n\n".join(paper_strings)
 
     try:
-        text, msg_history = get_response_from_llm(
+        text, msg_history = get_response_from_local_llm(
             citation_second_prompt.format(
                 papers=papers_str,
                 current_round=current_round,
                 total_rounds=total_rounds,
             ),
-            client=client,
+            platform=platform,
             model=model,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
@@ -399,7 +399,7 @@ Ensure the citation is well-integrated into the text.'''
 
 # PERFORM WRITEUP
 def perform_writeup(
-        idea, folder_name, coder, cite_client, cite_model, num_cite_rounds=20, engine="openalex"
+        idea, folder_name, coder, platform, model, num_cite_rounds=20, engine="openalex"
 ):
     # CURRENTLY ASSUMES LATEX
     abstract_prompt = f"""We've provided the `latex/template.tex` file to the project. We will be filling it in section by section.
@@ -466,7 +466,7 @@ Be sure to first name the file and use *SEARCH/REPLACE* blocks to perform these 
         with open(osp.join(folder_name, "latex", "template.tex"), "r") as f:
             draft = f.read()
         prompt, done = get_citation_aider_prompt(
-            cite_client, cite_model, draft, _, num_cite_rounds, engine=engine
+            platform, model, draft, _, num_cite_rounds, engine=engine
         )
         if done:
             break
@@ -522,21 +522,33 @@ if __name__ == "__main__":
     parser.add_argument("--folder", type=str)
     parser.add_argument("--no-writing", action="store_true", help="Only generate")
     parser.add_argument(
+        "--platform",
+        type=str,
+        default="transformers",
+        choices=AVAILABLE_PLATFORMS,
+        help="Model platform to use for AI Scientist.",
+    )
+    parser.add_argument(
         "--model",
         type=str,
-        default="gpt-4o-2024-05-13",
+        default="meta-llama/Llama-3.3-70B-Instruct",
         choices=AVAILABLE_LLMS,
         help="Model to use for AI Scientist.",
     )
     parser.add_argument(
+        "--coder_ollama_model",
+        type=str,
+        default="qwen2.5-coder:32b-base-fp16",
+        help="This ollama model is used for Aider to code.",
+    )
+    parser.add_argument(
         "--engine",
         type=str,
-        default="semanticscholar",
-        choices=["semanticscholar", "openalex"],
+        default="openalex",
+        choices=["openalex", "core", "semanticscholar"],
         help="Scholar engine to use.",
     )
     args = parser.parse_args()
-    client, client_model = create_client(args.model)
     print("Make sure you cleaned the Aider logs if re-generating the writeup!")
     folder_name = args.folder
     idea_name = osp.basename(folder_name)
@@ -556,12 +568,7 @@ if __name__ == "__main__":
         raise ValueError(f"Idea {idea_name} not found")
     fnames = [exp_file, writeup_file, notes]
     io = InputOutput(yes=True, chat_history_file=f"{folder_name}/{idea_name}_aider.txt")
-    if args.model == "deepseek-coder-v2-0724":
-        main_model = Model("deepseek/deepseek-coder")
-    elif args.model == "llama3.1-405b":
-        main_model = Model("openrouter/meta-llama/llama-3.1-405b-instruct")
-    else:
-        main_model = Model(model)
+    main_model = Model("ollama_chat/" + args.coder_ollama_model)
     coder = Coder.create(
         main_model=main_model,
         fnames=fnames,
@@ -574,6 +581,6 @@ if __name__ == "__main__":
         generate_latex(coder, args.folder, f"{args.folder}/test.pdf")
     else:
         try:
-            perform_writeup(idea, folder_name, coder, client, client_model, engine=args.engine)
+            perform_writeup(idea, folder_name, coder, args.platform, args.model, engine=args.engine)
         except Exception as e:
             print(f"Failed to perform writeup: {e}")

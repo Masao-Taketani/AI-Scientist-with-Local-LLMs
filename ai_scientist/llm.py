@@ -23,6 +23,105 @@ AVAILABLE_LLMS = [
 
 # Get N responses from a single message, used for ensembling.
 #@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
+def get_batch_responses_from_local_llm(
+        msg,
+        platform,
+        model,
+        system_message,
+        print_debug=False,
+        msg_history=None,
+        temperature=0.75,
+        n_responses=1,
+):
+    if msg_history is None:
+        msg_history = []
+
+    if model in [
+        "gpt-4o-2024-05-13",
+        "gpt-4o-mini-2024-07-18",
+        "gpt-4o-2024-08-06",
+    ]:
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_message},
+                *new_msg_history,
+            ],
+            temperature=temperature,
+            max_tokens=MAX_NUM_TOKENS,
+            n=n_responses,
+            stop=None,
+            seed=0,
+        )
+        content = [r.message.content for r in response.choices]
+        new_msg_history = [
+            new_msg_history + [{"role": "assistant", "content": c}] for c in content
+        ]
+    elif model == "deepseek-coder-v2-0724":
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        response = client.chat.completions.create(
+            model="deepseek-coder",
+            messages=[
+                {"role": "system", "content": system_message},
+                *new_msg_history,
+            ],
+            temperature=temperature,
+            max_tokens=MAX_NUM_TOKENS,
+            n=n_responses,
+            stop=None,
+        )
+        content = [r.message.content for r in response.choices]
+        new_msg_history = [
+            new_msg_history + [{"role": "assistant", "content": c}] for c in content
+        ]
+    elif model == "llama-3-1-405b-instruct":
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        response = client.chat.completions.create(
+            model="meta-llama/llama-3.1-405b-instruct",
+            messages=[
+                {"role": "system", "content": system_message},
+                *new_msg_history,
+            ],
+            temperature=temperature,
+            max_tokens=MAX_NUM_TOKENS,
+            n=n_responses,
+            stop=None,
+        )
+        content = [r.message.content for r in response.choices]
+        new_msg_history = [
+            new_msg_history + [{"role": "assistant", "content": c}] for c in content
+        ]
+    else:
+        content, new_msg_history = [], []
+        for _ in range(n_responses):
+            c, hist = get_response_from_local_llm(
+                msg,
+                platform,
+                model,
+                system_message,
+                print_debug=False,
+                msg_history=None,
+                temperature=temperature,
+            )
+            content.append(c)
+            new_msg_history.append(hist)
+
+    if print_debug:
+        # Just print the first one.
+        print()
+        print("*" * 20 + " LLM START " + "*" * 20)
+        for j, msg in enumerate(new_msg_history[0]):
+            print(f'{j}, {msg["role"]}: {msg["content"]}')
+        print(content)
+        print("*" * 21 + " LLM END " + "*" * 21)
+        print()
+
+    return content, new_msg_history
+
+
+# Get N responses from a single message, used for ensembling.
+#@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
 def get_batch_responses_from_llm(
         msg,
         client,

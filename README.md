@@ -4,6 +4,8 @@ which the original repo does not. It is especially good if you or your organizat
 advantages are as follows.
 
 - Don't need to send your data to the closed LLMs.
+- Once you download a model, you don't need to use the internet to process.
+- Can flexibly finetune a LLM model if you want to.
 - Don't need to spend money on a pay-as-you-go APIs, which is ambiguous and hard to estimate the total costs that you need to pay.
 Besides, even if you decide to utilize one of the closed LLMs later on, using local LLMs first can give you an approximation of the costs 
 before using the closed LLMs, such as how many tokens a LLM would produce in order to solve your problem. 

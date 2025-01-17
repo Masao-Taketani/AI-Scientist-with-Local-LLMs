@@ -14,7 +14,7 @@ from aider.models import Model
 from datetime import datetime
 
 from ai_scientist.generate_ideas import generate_ideas, check_idea_novelty
-from ai_scientist.llm import create_client, AVAILABLE_LLMS
+from ai_scientist.llm import create_client, AVAILABLE_LLMS, AVAILABLE_PLATFORMS
 from ai_scientist.perform_experiments import perform_experiments
 from ai_scientist.perform_review import perform_review, load_paper, perform_improvement
 from ai_scientist.perform_writeup import perform_writeup, generate_latex
@@ -46,11 +46,24 @@ def parse_arguments():
         help="Experiment to run AI Scientist on.",
     )
     parser.add_argument(
+        "--platform",
+        type=str,
+        default="transformers",
+        choices=AVAILABLE_PLATFORMS,
+        help="Model platform to use for AI Scientist.",
+    )
+    parser.add_argument(
         "--model",
         type=str,
-        default="meta-llama/Llama-3.3-70B-Instruct",
+        default="Qwen/Qwen2.5-72B-Instruct",
         choices=AVAILABLE_LLMS,
         help="Model to use for AI Scientist.",
+    )
+    parser.add_argument(
+        "--coder_ollama_model",
+        type=str,
+        default="qwen2.5-coder:32b-base-fp16",
+        help="This ollama model is used for Aider to code.",
     )
     parser.add_argument(
         "--writeup",
@@ -102,9 +115,9 @@ def worker(
         queue,
         base_dir,
         results_dir,
+        coder_ollama_model,
+        platform,
         model,
-        client,
-        client_model,
         writeup,
         improvement,
         gpu_id,
@@ -119,9 +132,9 @@ def worker(
             base_dir,
             results_dir,
             idea,
+            coder_ollama_model,
+            platform,
             model,
-            client,
-            client_model,
             writeup,
             improvement,
             log_file=True,
@@ -134,9 +147,9 @@ def do_idea(
         base_dir,
         results_dir,
         idea,
+        coder_ollama_model,
+        platform,
         model,
-        client,
-        client_model,
         writeup,
         improvement,
         log_file=False,
@@ -175,12 +188,7 @@ def do_idea(
         io = InputOutput(
             yes=True, chat_history_file=f"{folder_name}/{idea_name}_aider.txt"
         )
-        if model == "deepseek-coder-v2-0724":
-            main_model = Model("deepseek/deepseek-coder")
-        elif model == "llama3.1-405b":
-            main_model = Model("openrouter/meta-llama/llama-3.1-405b-instruct")
-        else:
-            main_model = Model(model)
+        main_model = Model("ollama_chat/" + coder_ollama_model)
         coder = Coder.create(
             main_model=main_model,
             fnames=fnames,
@@ -209,12 +217,7 @@ def do_idea(
         if writeup == "latex":
             writeup_file = osp.join(folder_name, "latex", "template.tex")
             fnames = [exp_file, writeup_file, notes]
-            if model == "deepseek-coder-v2-0724":
-                main_model = Model("deepseek/deepseek-coder")
-            elif model == "llama3.1-405b":
-                main_model = Model("openrouter/meta-llama/llama-3.1-405b-instruct")
-            else:
-                main_model = Model(model)
+            main_model = Model(coder_ollama_model)
             coder = Coder.create(
                 main_model=main_model,
                 fnames=fnames,
@@ -224,7 +227,7 @@ def do_idea(
                 edit_format="diff",
             )
             try:
-                perform_writeup(idea, folder_name, coder, client, client_model, engine=args.engine)
+                perform_writeup(idea, folder_name, coder, platform, model, engine=args.engine)
             except Exception as e:
                 print(f"Failed to perform writeup: {e}")
                 return False
@@ -240,8 +243,8 @@ def do_idea(
                 paper_text = load_paper(f"{folder_name}/{idea['Name']}.pdf")
                 review = perform_review(
                     paper_text,
-                    model="gpt-4o-2024-05-13",
-                    client=openai.OpenAI(),
+                    platform=platform,
+                    model=model,
                     num_reflections=5,
                     num_fs_examples=1,
                     num_reviews_ensemble=5,
@@ -266,8 +269,8 @@ def do_idea(
                 paper_text = load_paper(f"{folder_name}/{idea['Name']}_improved.pdf")
                 review = perform_review(
                     paper_text,
-                    model="gpt-4o-2024-05-13",
-                    client=openai.OpenAI(),
+                    platform=platform,
+                    model=model,
                     num_reflections=5,
                     num_fs_examples=1,
                     num_reviews_ensemble=5,
@@ -304,15 +307,12 @@ if __name__ == "__main__":
 
     print(f"Using GPUs: {available_gpus}")
 
-    # Create client
-    client, client_model = create_client(args.model)
-
     base_dir = osp.join("templates", args.experiment)
     results_dir = osp.join("results", args.experiment)
     ideas = generate_ideas(
         base_dir,
-        client=client,
-        model=client_model,
+        platform=args.platform,
+        model=args.model,
         skip_generation=args.skip_idea_generation,
         max_num_generations=args.num_ideas,
         num_reflections=NUM_REFLECTIONS,
@@ -347,9 +347,9 @@ if __name__ == "__main__":
                     queue,
                     base_dir,
                     results_dir,
+                    args.coder_ollama_model,
+                    args.platform,
                     args.model,
-                    client,
-                    client_model,
                     args.writeup,
                     args.improvement,
                     gpu_id,
@@ -375,9 +375,9 @@ if __name__ == "__main__":
                     base_dir,
                     results_dir,
                     idea,
+                    args.coder_ollama_model,
+                    args.platform,
                     args.model,
-                    client,
-                    client_model,
                     args.writeup,
                     args.improvement,
                 )
