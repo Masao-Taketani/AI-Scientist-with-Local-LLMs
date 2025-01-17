@@ -3,21 +3,22 @@ FROM continuumio/anaconda3:latest
 RUN apt-get update && apt-get install -y \
     texlive-full \
     build-essential \
-    screen
+    screen \
+    git
 
 RUN curl -fsSL https://ollama.com/install.sh | sh
     
-RUN pip install torch \
-                transformers==4.47.1 \
-                accelerate \
-                datasets \
-                backoff \
+RUN pip install aider-chat \
                 autoawq \
-                pyalex \
-                aider-chat \
+                backoff \
+                matplotlib \
                 pypdf \
                 pymupdf4llm \
-                matplotlib \
+                torch \
+                transformers \
+                accelerate \
+                datasets \
+                pyalex \
                 jupyter notebook
 
 RUN mkdir /work && chmod 777 /work

@@ -1,9 +1,12 @@
+aider-chat
+autoawq
+backoff
+matplotlib
+pypdf
+pymupdf4llm
 torch
 transformers
 accelerate
 datasets
-backoff
-# autoawq is used for Qwen/Qwen2.5-72B-Instruct-AWQ
-autoawq
 pyalex
 jupyter notebook

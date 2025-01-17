@@ -13,6 +13,40 @@ before using the closed LLMs, such as how many tokens a LLM would produce in ord
 investigation purpose.
 
 
+## Environment
+This repo has prepared two kinds to create execution environments, Docker and Anaconda. So, pick either one and follow the instruction.
+
+### Docker
+Follow the installation steps below.
+```
+git clone https://github.com/Masao-Taketani/AI-Scientist-with-Local-LLMs.git
+cd AI-Scientist-with-Local-LLMs
+
+(Type the following commands at host)
+docker build -t ai_scientist .
+docker run -it --rm --ipc=host --gpus '"device=[device id(s)]"' -v .:/work ai_scientist:latest
+
+(Type the following commands after starting the container)
+screen -S ollama
+ollama serve
+(Ctrl+a+d to get out of the screen session)
+```
+
+### Anaconda
+```
+conda create -n ai_scientist python=3.11
+conda activate ai_scientist
+# Install pdflatex
+sudo apt-get install texlive-full
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+# Install PyPI requirements
+pip install -r requirements.txt
+
+# In another terminal window, start your ollama server
+ollama serve
+```
+
 ## Installation
 ```bash
 conda create -n ai_scientist python=3.11
