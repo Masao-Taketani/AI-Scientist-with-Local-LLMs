@@ -1,8 +1,8 @@
 # The AI Scientist with Local LLMs
 This repository is based on [The AI Scientists](https://github.com/SakanaAI/AI-Scientist), but this repository supports local LLMs models, 
-which the original repo does not. It is especially good if you or your organization has enough GPUs for you to use. Some of the merits are as follows.
+which the original repo does not. It is especially good if you or your organization has enough GPUs for you to use. Some of possible 
+advantages are as follows.
 
-[merits]
 - Don't need to send your data to the closed LLMs.
 - Don't need to spend money on a pay-as-you-go APIs, which is ambiguous and hard to estimate the total costs that you need to pay.
 Besides, even if you decide to utilize one of the closed LLMs later on, using local LLMs first can give you an approximation of the costs 
@@ -26,10 +26,24 @@ pip install -r requirements.txt
 
 
 ## Literature Search APIs
-Since [Semantic Scholar API](https://www.semanticscholar.org/product/api) does not seem reliable, the original authors recently added 
-[OpenAlex API](https://docs.openalex.org/how-to-use-the-api/api-overview). This repository additionally add 
+Since [Semantic Scholar API](https://www.semanticscholar.org/product/api) [does not seem reliable](https://github.com/SakanaAI/AI-Scientist/issues/104), 
+the original authors recently added [OpenAlex API](https://docs.openalex.org/how-to-use-the-api/api-overview). This repository additionally add 
 [CORE API](https://core.ac.uk/services/api) referring to the [issue](https://github.com/SakanaAI/AI-Scientist/issues/104#issuecomment-2334149214).
-Thus, as for a literature search engine, you can pick among `openalex`, `core`, or `semanticscholar`. 
+Thus, as for a literature search engine, you can pick among `openalex`, `core`, or `semanticscholar` for `--engine` argument. In order to use each one 
+of them, you need set an environment variable accordingly.
+
+For OpenAlex API
+```
+export OPENALEX_MAIL_ADDRESS="Your email address"
+```
+For CORE API
+```
+export CORE_API_KEY="Your CORE API key"
+```
+Semantic Scholar API
+```
+export S2_API_KEY="Your Semantic Scholar key"
+```
 
 ## Supported Models
 
