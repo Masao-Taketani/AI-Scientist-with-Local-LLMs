@@ -326,13 +326,20 @@ def get_citation_aider_prompt(
 
     paper_strings = []
     for i, paper in enumerate(papers):
+        if engine == "core":
+            venue = "Unknown"
+            year = "Unknown"
+        else:
+            venue = paper["venue"]
+            year = paper["year"]
+
         paper_strings.append(
             """{i}: {title}. {authors}. {venue}, {year}.\nAbstract: {abstract}""".format(
                 i=i,
                 title=paper["title"],
                 authors=paper["authors"],
-                venue=paper["venue"],
-                year=paper["year"],
+                venue=venue,
+                year=year,
                 abstract=paper["abstract"],
             )
         )
