@@ -75,7 +75,7 @@ ONLY INCLUDE "I am done" IF YOU ARE MAKING NO MORE CHANGES."""
 def generate_ideas(
         base_dir,
         platform,
-        model,
+        model_or_pipe,
         skip_generation=False,
         max_num_generations=20,
         num_reflections=5,
@@ -124,7 +124,7 @@ def generate_ideas(
                     num_reflections=num_reflections,
                 ),
                 platform=platform,
-                model=model,
+                model_or_pipe=model_or_pipe,
                 system_message=idea_system_prompt,
                 msg_history=msg_history,
             )
@@ -142,7 +142,7 @@ def generate_ideas(
                             current_round=j + 2, num_reflections=num_reflections
                         ),
                         platform=platform,
-                        model=model,
+                        model_or_pipe=model_or_pipe,
                         system_message=idea_system_prompt,
                         msg_history=msg_history,
                     )
@@ -348,7 +348,7 @@ def search_for_papers(query, result_limit=10, engine="openalex") -> Union[None, 
         works: List[Dict] = Works().search(query).get(per_page=result_limit)
         papers: List[Dict[str, str]] = [extract_info_from_work(work) for work in works]
         return papers
-    elif "core":
+    elif engine == "core":
         CORE_API_KEY = os.getenv("CORE_API_KEY")
         headers = {"Authorization": f"Bearer {CORE_API_KEY}"}
         payload = {"q": query, "limit": result_limit}
@@ -426,7 +426,7 @@ def check_idea_novelty(
         ideas,
         base_dir,
         platform,
-        model,
+        model_or_pipe,
         max_num_iterations=10,
         engine="openalex",
 ):
@@ -435,6 +435,8 @@ def check_idea_novelty(
     with open(osp.join(base_dir, "prompt.json"), "r") as f:
         prompt = json.load(f)
         task_description = prompt["task_description"]
+
+    
 
     for idx, idea in enumerate(ideas):
         if "novel" in idea:
@@ -448,59 +450,66 @@ def check_idea_novelty(
         papers_str = ""
 
         for j in range(max_num_iterations):
-            try:
-                text, msg_history = get_response_from_local_llm(
-                    novelty_prompt.format(
-                        current_round=j + 1,
-                        num_rounds=max_num_iterations,
-                        idea=idea,
-                        last_query_results=papers_str,
-                    ),
-                    platform=platform,
-                    model=model,
-                    system_message=novelty_system_msg.format(
-                        num_rounds=max_num_iterations,
-                        task_description=task_description,
-                        code=code,
-                    ),
-                    msg_history=msg_history,
-                )
-                if "decision made: novel" in text.lower():
-                    print("Decision made: novel after round", j)
-                    novel = True
-                    break
-                if "decision made: not novel" in text.lower():
-                    print("Decision made: not novel after round", j)
-                    break
+            #try:
+            text, msg_history = get_response_from_local_llm(
+                novelty_prompt.format(
+                    current_round=j + 1,
+                    num_rounds=max_num_iterations,
+                    idea=idea,
+                    last_query_results=papers_str,
+                ),
+                platform=platform,
+                model_or_pipe=model_or_pipe,
+                system_message=novelty_system_msg.format(
+                    num_rounds=max_num_iterations,
+                    task_description=task_description,
+                    code=code,
+                ),
+                msg_history=msg_history,
+            )
+            if "decision made: novel" in text.lower():
+                print("Decision made: novel after round", j)
+                novel = True
+                break
+            if "decision made: not novel" in text.lower():
+                print("Decision made: not novel after round", j)
+                break
 
-                ## PARSE OUTPUT
-                json_output = extract_json_between_markers(text)
-                assert json_output is not None, "Failed to extract JSON from LLM output"
+            ## PARSE OUTPUT
+            json_output = extract_json_between_markers(text)
+            assert json_output is not None, "Failed to extract JSON from LLM output"
 
-                ## SEARCH FOR PAPERS
-                query = json_output["Query"]
-                papers = search_for_papers(query, result_limit=10, engine=engine)
-                if papers is None:
-                    papers_str = "No papers found."
+            ## SEARCH FOR PAPERS
+            query = json_output["Query"]
+            papers = search_for_papers(query, result_limit=10, engine=engine)
+            if papers is None:
+                papers_str = "No papers found."
 
-                paper_strings = []
-                for i, paper in enumerate(papers):
-                    paper_strings.append(
-                        """{i}: {title}. {authors}. {venue}, {year}.\nNumber of citations: {cites}\nAbstract: {abstract}""".format(
-                            i=i,
-                            title=paper["title"],
-                            authors=paper["authors"],
-                            venue=paper["venue"],
-                            year=paper["year"],
-                            cites=paper["citationCount"],
-                            abstract=paper["abstract"],
-                        )
+            paper_strings = []
+            for i, paper in enumerate(papers):
+                if engine == "core":
+                    venue = "Unknown"
+                    year = "Unknown"
+                else:
+                    venue = paper["venue"]
+                    year = paper["year"]
+
+                paper_strings.append(
+                    """{i}: {title}. {authors}. {venue}, {year}.\nNumber of citations: {cites}\nAbstract: {abstract}""".format(
+                        i=i,
+                        title=paper["title"],
+                        authors=paper["authors"],
+                        venue=venue,
+                        year=year,
+                        cites=paper["citationCount"],
+                        abstract=paper["abstract"],
                     )
-                papers_str = "\n\n".join(paper_strings)
+                )
+            papers_str = "\n\n".join(paper_strings)
 
-            except Exception as e:
-                print(f"Error: {e}")
-                continue
+            #except Exception as e:
+            #    print(f"Error: {e}")
+            #    continue
 
         idea["novel"] = novel
 
@@ -562,5 +571,5 @@ if __name__ == "__main__":
             ideas,
             base_dir=base_dir,
             client=client,
-            model=client_model,
+            model_or_pipe=client_model,
         )

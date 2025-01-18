@@ -19,6 +19,8 @@ from ai_scientist.perform_experiments import perform_experiments
 from ai_scientist.perform_review import perform_review, load_paper, perform_improvement
 from ai_scientist.perform_writeup import perform_writeup, generate_latex
 
+from transformers import pipeline
+
 NUM_REFLECTIONS = 3
 
 
@@ -56,7 +58,6 @@ def parse_arguments():
         "--model",
         type=str,
         default="Qwen/Qwen2.5-72B-Instruct",
-        choices=AVAILABLE_LLMS,
         help="Model to use for AI Scientist.",
     )
     parser.add_argument(
@@ -243,8 +244,8 @@ def do_idea(
                 paper_text = load_paper(f"{folder_name}/{idea['Name']}.pdf")
                 review = perform_review(
                     paper_text,
-                    platform=platform,
-                    model=model,
+                    platform,
+                    model,
                     num_reflections=5,
                     num_fs_examples=1,
                     num_reviews_ensemble=5,
@@ -269,8 +270,8 @@ def do_idea(
                 paper_text = load_paper(f"{folder_name}/{idea['Name']}_improved.pdf")
                 review = perform_review(
                     paper_text,
-                    platform=platform,
-                    model=model,
+                    platform,
+                    model,
                     num_reflections=5,
                     num_fs_examples=1,
                     num_reviews_ensemble=5,
@@ -309,10 +310,20 @@ if __name__ == "__main__":
 
     base_dir = osp.join("templates", args.experiment)
     results_dir = osp.join("results", args.experiment)
+
+    if args.platform == "transformers":
+        torch_dtype = torch.float16 if "awq" in args.model.lower() else torch.bfloat16
+        pipe = pipeline("text-generation", 
+                        model=args.model, 
+                        model_kwargs={"torch_dtype": torch_dtype}, 
+                        #device="cuda")
+                        device_map="auto")
+        args.model = pipe
+
     ideas = generate_ideas(
         base_dir,
-        platform=args.platform,
-        model=args.model,
+        args.platform,
+        args.model,
         skip_generation=args.skip_idea_generation,
         max_num_generations=args.num_ideas,
         num_reflections=NUM_REFLECTIONS,
@@ -322,7 +333,7 @@ if __name__ == "__main__":
             ideas,
             base_dir=base_dir,
             platform=args.platform,
-            model=args.model,
+            model_or_pipe=args.model,
             engine=args.engine,
         )
 

@@ -303,7 +303,7 @@ def get_citation_aider_prompt(
                 draft=draft, current_round=current_round, total_rounds=total_rounds
             ),
             platform=platform,
-            model=model,
+            model_or_pipe=model,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
         )
@@ -346,7 +346,7 @@ def get_citation_aider_prompt(
                 total_rounds=total_rounds,
             ),
             platform=platform,
-            model=model,
+            model_or_pipe=model,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
         )

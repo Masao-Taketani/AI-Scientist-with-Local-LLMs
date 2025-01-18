@@ -211,7 +211,7 @@ REVIEW JSON:
         llm_review, msg_history = get_response_from_local_llm(
             base_prompt,
             platform=platform,
-            model=model,
+            model_or_pipe=model,
             system_message=reviewer_system_prompt,
             print_debug=False,
             msg_history=msg_history,
@@ -225,7 +225,7 @@ REVIEW JSON:
             text, msg_history = get_response_from_local_llm(
                 reviewer_reflection_prompt,
                 platform=platform,
-                model=model,
+                model_or_pipe=model,
                 system_message=reviewer_system_prompt,
                 msg_history=msg_history,
                 temperature=temperature,
@@ -373,7 +373,7 @@ Review {i + 1}/{len(reviews)}:
     llm_review, msg_history = get_response_from_local_llm(
         base_prompt,
         platform=platform,
-        model=model,
+        model_or_pipe=model,
         system_message=meta_reviewer_system_prompt.format(reviewer_count=len(reviews)),
         print_debug=False,
         msg_history=None,

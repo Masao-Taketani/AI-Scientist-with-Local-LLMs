@@ -1,12 +1,9 @@
 import json
 import os
 import re
-
 #import backoff
-from transformers import pipeline
-from transformers import set_seed
-
 import torch
+from transformers import set_seed
 
 MAX_NUM_TOKENS = 4096
 
@@ -26,7 +23,7 @@ AVAILABLE_LLMS = [
 def get_batch_responses_from_local_llm(
         msg,
         platform,
-        model,
+        model_or_pipe,
         system_message,
         print_debug=False,
         msg_history=None,
@@ -98,7 +95,7 @@ def get_batch_responses_from_local_llm(
             c, hist = get_response_from_local_llm(
                 msg,
                 platform,
-                model,
+                model_or_pipe,
                 system_message,
                 print_debug=False,
                 msg_history=None,
@@ -219,10 +216,11 @@ def get_batch_responses_from_llm(
     return content, new_msg_history
 
 
+#@backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APITimeoutError))
 def get_response_from_local_llm(
         msg,
         platform,
-        model,
+        model_or_pipe,
         system_message,
         print_debug=False,
         msg_history=None,
@@ -232,15 +230,8 @@ def get_response_from_local_llm(
         msg_history = []
 
     if 'transformers' in platform:
-        torch_dtype = torch.float16 if "awq" in model.lower() else torch.bfloat16
-        pipe = pipeline("text-generation", 
-                        model=model, 
-                        model_kwargs={"torch_dtype": torch_dtype}, 
-                        #device="cuda")
-                        device_map="auto")
-
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        prompt = pipe.tokenizer.apply_chat_template(
+        prompt = model_or_pipe.tokenizer.apply_chat_template(
             new_msg_history, 
             tokenize=False, 
             add_generation_prompt=True
@@ -252,11 +243,11 @@ def get_response_from_local_llm(
         #]
 
         set_seed(0)
-        response = pipe(prompt,
-                        do_sample=True,
-                        temperature=temperature,
-                        max_new_tokens=MAX_NUM_TOKENS,
-                        #eos_token_id=terminators,
+        response = model_or_pipe(prompt,
+                                 do_sample=True,
+                                 temperature=temperature,
+                                 max_new_tokens=MAX_NUM_TOKENS,
+                                 #eos_token_id=terminators,
         )
 
         content = response[0]["generated_text"][len(prompt):]
