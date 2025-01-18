@@ -8,7 +8,7 @@ import subprocess
 from typing import Optional, Tuple
 
 from ai_scientist.generate_ideas import search_for_papers
-from ai_scientist.llm import get_response_from_llm, extract_json_between_markers, create_client, AVAILABLE_LLMS
+from ai_scientist.llm import get_response_from_local_llm, extract_json_between_markers, create_client, AVAILABLE_LLMS
 
 
 # GENERATE LATEX
