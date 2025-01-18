@@ -61,10 +61,16 @@ def parse_arguments():
         help="Model to use for AI Scientist.",
     )
     parser.add_argument(
-        "--coder_ollama_model",
+        "--coder-ollama-model",
         type=str,
-        default="qwen2.5-coder:32b-base-fp16",
+        default="qwen2.5-coder:32b-instruct-fp16",
         help="This ollama model is used for Aider to code.",
+    )
+    parser.add_argument(
+        "--edit-format",
+        type=str,
+        default="diff",
+        help="Used for Aider.",
     )
     parser.add_argument(
         "--writeup",
@@ -121,6 +127,7 @@ def worker(
         model,
         writeup,
         improvement,
+        edit_format,
         gpu_id,
 ):
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
@@ -138,6 +145,7 @@ def worker(
             model,
             writeup,
             improvement,
+            edit_format,
             log_file=True,
         )
         print(f"Completed idea: {idea['Name']}, Success: {success}")
@@ -153,6 +161,7 @@ def do_idea(
         model,
         writeup,
         improvement,
+        edit_format,
         log_file=False,
 ):
     ## CREATE PROJECT FOLDER
@@ -196,7 +205,7 @@ def do_idea(
             io=io,
             stream=False,
             use_git=False,
-            edit_format="diff",
+            edit_format=edit_format,
         )
 
         print_time()
@@ -218,14 +227,14 @@ def do_idea(
         if writeup == "latex":
             writeup_file = osp.join(folder_name, "latex", "template.tex")
             fnames = [exp_file, writeup_file, notes]
-            main_model = Model(coder_ollama_model)
+            main_model = Model("ollama_chat/" + coder_ollama_model)
             coder = Coder.create(
                 main_model=main_model,
                 fnames=fnames,
                 io=io,
                 stream=False,
                 use_git=False,
-                edit_format="diff",
+                edit_format=edit_format,
             )
             try:
                 perform_writeup(idea, folder_name, coder, platform, model, engine=args.engine)
@@ -363,6 +372,7 @@ if __name__ == "__main__":
                     args.model,
                     args.writeup,
                     args.improvement,
+                    args.edit_format,
                     gpu_id,
                 ),
             )
@@ -391,6 +401,7 @@ if __name__ == "__main__":
                     args.model,
                     args.writeup,
                     args.improvement,
+                    args.edit_format,
                 )
                 print(f"Completed idea: {idea['Name']}, Success: {success}")
             except Exception as e:
