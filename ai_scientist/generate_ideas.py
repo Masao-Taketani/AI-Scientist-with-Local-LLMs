@@ -7,7 +7,7 @@ from typing import List, Dict, Union
 import backoff
 import requests
 
-from ai_scientist.llm import get_response_from_local_llm, extract_json_between_markers, create_client, AVAILABLE_LLMS
+from ai_scientist.llm import get_response_from_local_llm, extract_json_between_markers, create_client
 
 
 idea_first_prompt = """{task_description}
@@ -75,8 +75,8 @@ ONLY INCLUDE "I am done" IF YOU ARE MAKING NO MORE CHANGES."""
 def generate_ideas(
         base_dir,
         platform,
+        client,
         model_or_pipe,
-        client=None,
         skip_generation=False,
         max_num_generations=20,
         num_reflections=5,
