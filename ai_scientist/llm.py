@@ -4,6 +4,8 @@ import re
 #import backoff
 import torch
 from transformers import set_seed
+import openai
+
 
 MAX_NUM_TOKENS = 4096
 
@@ -162,10 +164,8 @@ def get_response_from_local_llm(
             stop=None,
             seed=0,
         )
-        content = [r.message.content for r in response.choices]
-        new_msg_history = [
-            new_msg_history + [{"role": "assistant", "content": c}] for c in content
-        ]
+        content = response.choices[0].message.content
+        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     else:
         raise ValueError(f"Platform {platform} not supported.")
 
@@ -212,4 +212,6 @@ def extract_json_between_markers(llm_output):
 def create_client(platform, model):
     if 'ollama' in platform:
         print(f"Using Ollama platform with model {model}.")
-        return openai.OpenAI()
+        return openai.OpenAI(base_url='http://localhost:11434/v1/',
+                             api_key='ollama', # required but ignored
+                             )

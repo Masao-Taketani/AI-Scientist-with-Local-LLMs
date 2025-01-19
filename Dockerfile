@@ -11,6 +11,7 @@ RUN curl -fsSL https://ollama.com/install.sh | sh
 RUN pip install aider-chat \
                 autoawq \
                 backoff \
+                openai \
                 matplotlib \
                 pypdf \
                 pymupdf4llm \

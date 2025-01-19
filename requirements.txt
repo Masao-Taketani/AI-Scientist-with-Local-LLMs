@@ -1,6 +1,7 @@
 aider-chat
 autoawq
 backoff
+openai
 matplotlib
 pypdf
 pymupdf4llm
