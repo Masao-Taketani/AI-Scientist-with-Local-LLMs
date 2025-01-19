@@ -9,12 +9,7 @@ MAX_NUM_TOKENS = 4096
 
 AVAILABLE_PLATFORMS = [
     "transformers",
-]
-
-AVAILABLE_LLMS = [
-    "meta-llama/Llama-3.3-70B-Instruct",
-    "Qwen/Qwen2.5-72B-Instruct",
-    "Qwen/Qwen2.5-72B-Instruct-AWQ",
+    "ollama"
 ]
 
 
@@ -222,6 +217,7 @@ def get_response_from_local_llm(
         platform,
         model_or_pipe,
         system_message,
+        client=None,
         print_debug=False,
         msg_history=None,
         temperature=0.75,
@@ -232,28 +228,43 @@ def get_response_from_local_llm(
     if 'transformers' in platform:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         prompt = model_or_pipe.tokenizer.apply_chat_template(
-            new_msg_history, 
+            [
+                {"role": "system", "content": system_message},
+                *new_msg_history,
+            ], 
             tokenize=False, 
             add_generation_prompt=True
         )
-
-        #terminators = [
-        #    pipeline.tokenizer.eos_token_id,
-        #    pipeline.tokenizer.convert_tokens_to_ids("<|eot_id|>")
-        #]
 
         set_seed(0)
         response = model_or_pipe(prompt,
                                  do_sample=True,
                                  temperature=temperature,
                                  max_new_tokens=MAX_NUM_TOKENS,
-                                 #eos_token_id=terminators,
         )
 
         content = response[0]["generated_text"][len(prompt):]
         new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+    elif 'ollama' in platform:
+        assert client, "To use an Ollama model, set up the client."
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        response = client.chat.completions.create(
+            model=model_or_pipe,
+            messages=[
+                {"role": "system", "content": system_message},
+                *new_msg_history,
+            ],
+            temperature=temperature,
+            max_tokens=MAX_NUM_TOKENS,
+            stop=None,
+            seed=0,
+        )
+        content = [r.message.content for r in response.choices]
+        new_msg_history = [
+            new_msg_history + [{"role": "assistant", "content": c}] for c in content
+        ]
     else:
-        raise ValueError(f"Model {model} not supported.")
+        raise ValueError(f"Platform {platform} not supported.")
 
     if print_debug:
         print()
