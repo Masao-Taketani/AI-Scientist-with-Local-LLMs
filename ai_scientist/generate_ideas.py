@@ -76,6 +76,7 @@ def generate_ideas(
         base_dir,
         platform,
         model_or_pipe,
+        client=None,
         skip_generation=False,
         max_num_generations=20,
         num_reflections=5,
@@ -124,6 +125,7 @@ def generate_ideas(
                     num_reflections=num_reflections,
                 ),
                 platform=platform,
+                client=client,
                 model_or_pipe=model_or_pipe,
                 system_message=idea_system_prompt,
                 msg_history=msg_history,
@@ -142,6 +144,7 @@ def generate_ideas(
                             current_round=j + 2, num_reflections=num_reflections
                         ),
                         platform=platform,
+                        client=client,
                         model_or_pipe=model_or_pipe,
                         system_message=idea_system_prompt,
                         msg_history=msg_history,
@@ -176,6 +179,7 @@ def generate_ideas(
 # GENERATE IDEAS OPEN-ENDED
 def generate_next_idea(
         base_dir,
+        platform,
         client,
         model,
         prev_idea_archive=[],
@@ -210,7 +214,7 @@ def generate_next_idea(
 
                 msg_history = []
                 print(f"Iteration 1/{num_reflections}")
-                text, msg_history = get_response_from_llm(
+                text, msg_history = get_response_from_local_llm(
                     idea_first_prompt.format(
                         task_description=prompt["task_description"],
                         code=code,
@@ -222,6 +226,7 @@ Completed ideas have an additional "Score" field which indicates the assessment 
 This is on a standard 1-10 ML conference scale.
 Scores of 0 indicate the idea failed either during experimentation, writeup or reviewing.
 """,
+                    platform=platform,
                     client=client,
                     model=model,
                     system_message=idea_system_prompt,
@@ -236,10 +241,11 @@ Scores of 0 indicate the idea failed either during experimentation, writeup or r
                 if num_reflections > 1:
                     for j in range(num_reflections - 1):
                         print(f"Iteration {j + 2}/{num_reflections}")
-                        text, msg_history = get_response_from_llm(
+                        text, msg_history = get_response_from_local_llm(
                             idea_reflection_prompt.format(
                                 current_round=j + 2, num_reflections=num_reflections
                             ),
+                            platform=platform,
                             client=client,
                             model=model,
                             system_message=idea_system_prompt,
@@ -427,6 +433,7 @@ def check_idea_novelty(
         base_dir,
         platform,
         model_or_pipe,
+        client=None,
         max_num_iterations=10,
         engine="openalex",
 ):
@@ -459,6 +466,7 @@ def check_idea_novelty(
                     last_query_results=papers_str,
                 ),
                 platform=platform,
+                client=client,
                 model_or_pipe=model_or_pipe,
                 system_message=novelty_system_msg.format(
                     num_rounds=max_num_iterations,
@@ -482,6 +490,9 @@ def check_idea_novelty(
             ## SEARCH FOR PAPERS
             query = json_output["Query"]
             papers = search_for_papers(query, result_limit=10, engine=engine)
+            #print("##############################[papers]#############################")
+            #print(type(papers[0]))
+            #print(papers[0])
             if papers is None:
                 papers_str = "No papers found."
 
@@ -537,8 +548,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        default="gpt-4o-2024-05-13",
-        choices=AVAILABLE_LLMS,
+        default="Qwen/Qwen2.5-72B-Instruct",
         help="Model to use for AI Scientist.",
     )
     parser.add_argument(

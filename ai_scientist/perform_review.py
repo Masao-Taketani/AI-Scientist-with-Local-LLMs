@@ -126,6 +126,7 @@ In general, authors should be rewarded rather than punished for being up front a
 def perform_review(
     text,
     platform,
+    client,
     model,
     num_reflections=1,
     num_fs_examples=1,
@@ -152,6 +153,7 @@ Here is the paper you are asked to review:
         llm_review, msg_histories = get_batch_responses_from_local_llm(
             base_prompt,
             platform=platform,
+            client=client,
             model=model,
             system_message=reviewer_system_prompt,
             print_debug=False,
@@ -167,7 +169,7 @@ Here is the paper you are asked to review:
             except Exception as e:
                 print(f"Ensemble review {idx} failed: {e}")
         parsed_reviews = [r for r in parsed_reviews if r is not None]
-        review = get_meta_review(platform, model, temperature, parsed_reviews)
+        review = get_meta_review(platform, client, model, temperature, parsed_reviews)
 
         # take first valid in case meta-reviewer fails
         if review is None:
@@ -211,6 +213,7 @@ REVIEW JSON:
         llm_review, msg_history = get_response_from_local_llm(
             base_prompt,
             platform=platform,
+            client=client,
             model_or_pipe=model,
             system_message=reviewer_system_prompt,
             print_debug=False,
@@ -225,6 +228,7 @@ REVIEW JSON:
             text, msg_history = get_response_from_local_llm(
                 reviewer_reflection_prompt,
                 platform=platform,
+                client=client,
                 model_or_pipe=model,
                 system_message=reviewer_system_prompt,
                 msg_history=msg_history,
@@ -358,7 +362,7 @@ Your job is to aggregate the reviews into a single meta-review in the same forma
 Be critical and cautious in your decision, find consensus, and respect the opinion of all the reviewers."""
 
 
-def get_meta_review(platform, model, temperature, reviews):
+def get_meta_review(platform, client, model, temperature, reviews):
     # Write a meta-review from a set of individual reviews
     review_text = ""
     for i, r in enumerate(reviews):
@@ -373,6 +377,7 @@ Review {i + 1}/{len(reviews)}:
     llm_review, msg_history = get_response_from_local_llm(
         base_prompt,
         platform=platform,
+        client=client,
         model_or_pipe=model,
         system_message=meta_reviewer_system_prompt.format(reviewer_count=len(reviews)),
         print_debug=False,

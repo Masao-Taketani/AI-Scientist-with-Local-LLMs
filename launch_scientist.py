@@ -14,7 +14,7 @@ from aider.models import Model
 from datetime import datetime
 
 from ai_scientist.generate_ideas import generate_ideas, check_idea_novelty
-from ai_scientist.llm import create_client, AVAILABLE_LLMS, AVAILABLE_PLATFORMS
+from ai_scientist.llm import create_client, AVAILABLE_PLATFORMS
 from ai_scientist.perform_experiments import perform_experiments
 from ai_scientist.perform_review import perform_review, load_paper, perform_improvement
 from ai_scientist.perform_writeup import perform_writeup, generate_latex
@@ -58,7 +58,7 @@ def parse_arguments():
         "--model",
         type=str,
         default="Qwen/Qwen2.5-72B-Instruct",
-        help="Model to use for AI Scientist.",
+        help="Specify a name of your model to use from available platforms.",
     )
     parser.add_argument(
         "--coder-ollama-model",
@@ -124,6 +124,7 @@ def worker(
         results_dir,
         coder_ollama_model,
         platform,
+        client,
         model,
         writeup,
         improvement,
@@ -142,6 +143,7 @@ def worker(
             idea,
             coder_ollama_model,
             platform,
+            client,
             model,
             writeup,
             improvement,
@@ -158,6 +160,7 @@ def do_idea(
         idea,
         coder_ollama_model,
         platform,
+        client,
         model,
         writeup,
         improvement,
@@ -237,7 +240,7 @@ def do_idea(
                 edit_format=edit_format,
             )
             try:
-                perform_writeup(idea, folder_name, coder, platform, model, engine=args.engine)
+                perform_writeup(idea, folder_name, coder, platform, client, model, engine=args.engine)
             except Exception as e:
                 print(f"Failed to perform writeup: {e}")
                 return False
@@ -254,6 +257,7 @@ def do_idea(
                 review = perform_review(
                     paper_text,
                     platform,
+                    client,
                     model,
                     num_reflections=5,
                     num_fs_examples=1,
@@ -280,6 +284,7 @@ def do_idea(
                 review = perform_review(
                     paper_text,
                     platform,
+                    client,
                     model,
                     num_reflections=5,
                     num_fs_examples=1,
@@ -321,6 +326,7 @@ if __name__ == "__main__":
     results_dir = osp.join("results", args.experiment)
 
     if args.platform == "transformers":
+        client = None
         torch_dtype = torch.float16 if "awq" in args.model.lower() else torch.bfloat16
         pipe = pipeline("text-generation", 
                         model=args.model, 
@@ -328,10 +334,15 @@ if __name__ == "__main__":
                         #device="cuda")
                         device_map="auto")
         args.model = pipe
+    elif args.platform == "ollama":
+        client = create_client(args.platform, args.model)
+    else:
+        raise ValueError(f"Platform {platform} not supported.")
 
     ideas = generate_ideas(
         base_dir,
         args.platform,
+        client,
         args.model,
         skip_generation=args.skip_idea_generation,
         max_num_generations=args.num_ideas,
@@ -342,6 +353,7 @@ if __name__ == "__main__":
             ideas,
             base_dir=base_dir,
             platform=args.platform,
+            client=client,
             model_or_pipe=args.model,
             engine=args.engine,
         )
@@ -369,6 +381,7 @@ if __name__ == "__main__":
                     results_dir,
                     args.coder_ollama_model,
                     args.platform,
+                    client,
                     args.model,
                     args.writeup,
                     args.improvement,
@@ -398,6 +411,7 @@ if __name__ == "__main__":
                     idea,
                     args.coder_ollama_model,
                     args.platform,
+                    client,
                     args.model,
                     args.writeup,
                     args.improvement,
