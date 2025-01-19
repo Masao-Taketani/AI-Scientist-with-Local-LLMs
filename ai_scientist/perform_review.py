@@ -6,7 +6,7 @@ import pymupdf
 import pymupdf4llm
 from ai_scientist.llm import (
     get_response_from_local_llm,
-    get_batch_responses_from_llm,
+    get_batch_responses_from_local_llm,
     extract_json_between_markers,
 )
 
@@ -149,7 +149,7 @@ Here is the paper you are asked to review:
 ```"""
 
     if num_reviews_ensemble > 1:
-        llm_review, msg_histories = get_batch_responses_from_llm(
+        llm_review, msg_histories = get_batch_responses_from_local_llm(
             base_prompt,
             platform=platform,
             model=model,
