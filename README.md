@@ -86,7 +86,7 @@ E.g. `--coder-ollama-model qwen2.5-coder:32b-instruct-q8_0`. Available Ollama mo
 
 ## Setting Up the Templates
 
-This section provides instructions for setting up each of the three templates used in our paper. Before running The AI Scientist experiments, 
+This section provides instructions for setting up each of the three templates used in the original paper. Before running The AI Scientist experiments, 
 please ensure you have completed the setup steps for the templates you are interested in.
 
 ### NanoGPT Template
@@ -165,13 +165,15 @@ please ensure you have completed the setup steps for the templates you are inter
 **Note:** Please ensure the setup steps above are completed before running these experiments.
 
 ```bash
-# Run the paper generation.
-python launch_scientist.py --model "gpt-4o-2024-05-13" --experiment nanoGPT_lite --num-ideas 2
-python launch_scientist.py --model "claude-3-5-sonnet-20241022" --experiment nanoGPT_lite --num-ideas 2
+# Run the paper generation (using Ollama platform for the AI scientist).
+python launch_scientist.py --coder-ollama-model qwen2.5-coder:32b-instruct-q8_0 --platform ollama --model qwen2.5:72b-instruct-fp16 --experiment nanoGPT_lite --num-ideas 2
+# Run the paper generation (using Hugging Face platform for the AI scientist).
+python launch_scientist.py --coder-ollama-model qwen2.5-coder:32b-instruct-fp16 --platform huggingface --model meta-llama/Llama-3.3-70B-Instruct --experiment nanoGPT_lite --num-ideas 2
 ```
 
 Although I have left `--parallel` argument as the original repo does, I do not recommend to use the argument,
-especially if you are using super-large local LLMs since those take huge GPU resources.
+especially if you are using super-large local LLMs, which are recommended to conduct complex tasks such as 
+doing academic research, since those take huge GPU resources.
 
 ## Getting an LLM-Generated Paper Review
 
@@ -221,6 +223,18 @@ If there is an area of study you would like **The AI Scientist** to explore, it 
 
 The key to making new templates work is matching the base filenames and output JSONs to the existing format; everything else is free to change.
 You should also ensure that the `template.tex` file is updated to use the correct citation style / base plots for your template.
+
+### Community-Contributed Templates
+
+We welcome community contributions in the form of new templates. While these are not maintained by us, we are delighted to highlight your templates to others. Below, we list community-contributed templates along with links to their pull requests (PRs):
+
+- Infectious Disease Modeling (`seir`) - [PR #137](https://github.com/SakanaAI/AI-Scientist/pull/137)
+- Image Classification with MobileNetV3 (`mobilenetV3`) - [PR #141](https://github.com/SakanaAI/AI-Scientist/pull/141)
+- Sketch RNN (`sketch_rnn`) - [PR #143](https://github.com/SakanaAI/AI-Scientist/pull/143)
+- Earthquake Prediction (`earthquake-prediction`) - [PR #167](https://github.com/SakanaAI/AI-Scientist/pull/167)
+- Tensorial Radiance Fields (`tensorf`) - [PR #175](https://github.com/SakanaAI/AI-Scientist/pull/175)
+
+*This section is reserved for community contributions. Please submit a pull request to add your template to the list! Please describe the template in the PR description, and also show examples of the generated papers.*
 
 ## Template Resources
 
