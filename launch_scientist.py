@@ -125,7 +125,7 @@ def worker(
         coder_ollama_model,
         platform,
         client,
-        model,
+        model_or_pipe,
         writeup,
         improvement,
         edit_format,
@@ -144,7 +144,7 @@ def worker(
             coder_ollama_model,
             platform,
             client,
-            model,
+            model_or_pipe,
             writeup,
             improvement,
             edit_format,
@@ -161,7 +161,7 @@ def do_idea(
         coder_ollama_model,
         platform,
         client,
-        model,
+        model_or_pipe,
         writeup,
         improvement,
         edit_format,
@@ -240,7 +240,7 @@ def do_idea(
                 edit_format=edit_format,
             )
             try:
-                perform_writeup(idea, folder_name, coder, platform, client, model, engine=args.engine)
+                perform_writeup(idea, folder_name, coder, platform, client, model_or_pipe, engine=args.engine)
             except Exception as e:
                 print(f"Failed to perform writeup: {e}")
                 return False
@@ -258,7 +258,7 @@ def do_idea(
                     paper_text,
                     platform,
                     client,
-                    model,
+                    model_or_pipe,
                     num_reflections=5,
                     num_fs_examples=1,
                     num_reviews_ensemble=5,
@@ -285,7 +285,7 @@ def do_idea(
                     paper_text,
                     platform,
                     client,
-                    model,
+                    model_or_pipe,
                     num_reflections=5,
                     num_fs_examples=1,
                     num_reviews_ensemble=5,
@@ -333,9 +333,10 @@ if __name__ == "__main__":
                         model_kwargs={"torch_dtype": torch_dtype}, 
                         #device="cuda")
                         device_map="auto")
-        args.model = pipe
+        model_or_pipe = pipe
     elif args.platform == "ollama":
         client = create_client(args.platform, args.model)
+        model_or_pipe = args.model
     else:
         raise ValueError(f"Platform {platform} not supported.")
 
@@ -343,7 +344,7 @@ if __name__ == "__main__":
         base_dir,
         args.platform,
         client,
-        args.model,
+        model_or_pipe,
         skip_generation=args.skip_idea_generation,
         max_num_generations=args.num_ideas,
         num_reflections=NUM_REFLECTIONS,
@@ -354,7 +355,7 @@ if __name__ == "__main__":
             base_dir=base_dir,
             platform=args.platform,
             client=client,
-            model_or_pipe=args.model,
+            model_or_pipe=model_or_pipe,
             engine=args.engine,
         )
 
@@ -382,7 +383,7 @@ if __name__ == "__main__":
                     args.coder_ollama_model,
                     args.platform,
                     client,
-                    args.model,
+                    model_or_pipe,
                     args.writeup,
                     args.improvement,
                     args.edit_format,
@@ -412,7 +413,7 @@ if __name__ == "__main__":
                     args.coder_ollama_model,
                     args.platform,
                     client,
-                    args.model,
+                    model_or_pipe,
                     args.writeup,
                     args.improvement,
                     args.edit_format,

@@ -127,7 +127,7 @@ def perform_review(
     text,
     platform,
     client,
-    model,
+    model_or_pipe,
     num_reflections=1,
     num_fs_examples=1,
     num_reviews_ensemble=1,
@@ -154,7 +154,7 @@ Here is the paper you are asked to review:
             base_prompt,
             platform=platform,
             client=client,
-            model=model,
+            model_or_pipe=model_or_pipe,
             system_message=reviewer_system_prompt,
             print_debug=False,
             msg_history=msg_history,
@@ -169,7 +169,7 @@ Here is the paper you are asked to review:
             except Exception as e:
                 print(f"Ensemble review {idx} failed: {e}")
         parsed_reviews = [r for r in parsed_reviews if r is not None]
-        review = get_meta_review(platform, client, model, temperature, parsed_reviews)
+        review = get_meta_review(platform, client, model_or_pipe, temperature, parsed_reviews)
 
         # take first valid in case meta-reviewer fails
         if review is None:
@@ -214,7 +214,7 @@ REVIEW JSON:
             base_prompt,
             platform=platform,
             client=client,
-            model_or_pipe=model,
+            model_or_pipe=model_or_pipe,
             system_message=reviewer_system_prompt,
             print_debug=False,
             msg_history=msg_history,
@@ -229,7 +229,7 @@ REVIEW JSON:
                 reviewer_reflection_prompt,
                 platform=platform,
                 client=client,
-                model_or_pipe=model,
+                model_or_pipe=model_or_pipe,
                 system_message=reviewer_system_prompt,
                 msg_history=msg_history,
                 temperature=temperature,
@@ -362,7 +362,7 @@ Your job is to aggregate the reviews into a single meta-review in the same forma
 Be critical and cautious in your decision, find consensus, and respect the opinion of all the reviewers."""
 
 
-def get_meta_review(platform, client, model, temperature, reviews):
+def get_meta_review(platform, client, model_or_pipe, temperature, reviews):
     # Write a meta-review from a set of individual reviews
     review_text = ""
     for i, r in enumerate(reviews):
@@ -378,7 +378,7 @@ Review {i + 1}/{len(reviews)}:
         base_prompt,
         platform=platform,
         client=client,
-        model_or_pipe=model,
+        model_or_pipe=model_or_pipe,
         system_message=meta_reviewer_system_prompt.format(reviewer_count=len(reviews)),
         print_debug=False,
         msg_history=None,

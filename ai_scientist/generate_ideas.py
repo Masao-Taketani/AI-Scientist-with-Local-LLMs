@@ -181,7 +181,7 @@ def generate_next_idea(
         base_dir,
         platform,
         client,
-        model,
+        model_or_pipe,
         prev_idea_archive=[],
         num_reflections=5,
         max_attempts=10,
@@ -228,7 +228,7 @@ Scores of 0 indicate the idea failed either during experimentation, writeup or r
 """,
                     platform=platform,
                     client=client,
-                    model=model,
+                    model_or_pipe=model_or_pipe,
                     system_message=idea_system_prompt,
                     msg_history=msg_history,
                 )
@@ -247,7 +247,7 @@ Scores of 0 indicate the idea failed either during experimentation, writeup or r
                             ),
                             platform=platform,
                             client=client,
-                            model=model,
+                            model_or_pipe=model_or_pipe,
                             system_message=idea_system_prompt,
                             msg_history=msg_history,
                         )

@@ -294,7 +294,7 @@ This JSON will be automatically parsed, so ensure the format is precise."""
 
 
 def get_citation_aider_prompt(
-        platform, client, model, draft, current_round, total_rounds, engine="semanticscholar"
+        platform, client, model_or_pipe, draft, current_round, total_rounds, engine="semanticscholar"
 ) -> Tuple[Optional[str], bool]:
     msg_history = []
     try:
@@ -304,7 +304,7 @@ def get_citation_aider_prompt(
             ),
             platform=platform,
             client=client,
-            model_or_pipe=model,
+            model_or_pipe=model_or_pipe,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
         )
@@ -355,7 +355,7 @@ def get_citation_aider_prompt(
             ),
             platform=platform,
             client=client,
-            model_or_pipe=model,
+            model_or_pipe=model_or_pipe,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
         )
@@ -408,7 +408,7 @@ Ensure the citation is well-integrated into the text.'''
 
 # PERFORM WRITEUP
 def perform_writeup(
-        idea, folder_name, coder, platform, model, client=None, num_cite_rounds=20, engine="openalex"
+        idea, folder_name, coder, platform, client, model_or_pipe, num_cite_rounds=20, engine="openalex"
 ):
     # CURRENTLY ASSUMES LATEX
     abstract_prompt = f"""We've provided the `latex/template.tex` file to the project. We will be filling it in section by section.
@@ -475,7 +475,7 @@ Be sure to first name the file and use *SEARCH/REPLACE* blocks to perform these 
         with open(osp.join(folder_name, "latex", "template.tex"), "r") as f:
             draft = f.read()
         prompt, done = get_citation_aider_prompt(
-            platform, client, model, draft, _, num_cite_rounds, engine=engine
+            platform, client, model_or_pipe, draft, _, num_cite_rounds, engine=engine
         )
         if done:
             break

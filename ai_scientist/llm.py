@@ -31,77 +31,20 @@ def get_batch_responses_from_local_llm(
     if msg_history is None:
         msg_history = []
 
-    if model in [
-        "gpt-4o-2024-05-13",
-        "gpt-4o-mini-2024-07-18",
-        "gpt-4o-2024-08-06",
-    ]:
-        new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_message},
-                *new_msg_history,
-            ],
+    content, new_msg_history = [], []
+    for _ in range(n_responses):
+        c, hist = get_response_from_local_llm(
+            msg,
+            platform,
+            client,
+            model_or_pipe,
+            system_message,
+            print_debug=False,
+            msg_history=None,
             temperature=temperature,
-            max_tokens=MAX_NUM_TOKENS,
-            n=n_responses,
-            stop=None,
-            seed=0,
         )
-        content = [r.message.content for r in response.choices]
-        new_msg_history = [
-            new_msg_history + [{"role": "assistant", "content": c}] for c in content
-        ]
-    elif model == "deepseek-coder-v2-0724":
-        new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        response = client.chat.completions.create(
-            model="deepseek-coder",
-            messages=[
-                {"role": "system", "content": system_message},
-                *new_msg_history,
-            ],
-            temperature=temperature,
-            max_tokens=MAX_NUM_TOKENS,
-            n=n_responses,
-            stop=None,
-        )
-        content = [r.message.content for r in response.choices]
-        new_msg_history = [
-            new_msg_history + [{"role": "assistant", "content": c}] for c in content
-        ]
-    elif model == "llama-3-1-405b-instruct":
-        new_msg_history = msg_history + [{"role": "user", "content": msg}]
-        response = client.chat.completions.create(
-            model="meta-llama/llama-3.1-405b-instruct",
-            messages=[
-                {"role": "system", "content": system_message},
-                *new_msg_history,
-            ],
-            temperature=temperature,
-            max_tokens=MAX_NUM_TOKENS,
-            n=n_responses,
-            stop=None,
-        )
-        content = [r.message.content for r in response.choices]
-        new_msg_history = [
-            new_msg_history + [{"role": "assistant", "content": c}] for c in content
-        ]
-    else:
-        content, new_msg_history = [], []
-        for _ in range(n_responses):
-            c, hist = get_response_from_local_llm(
-                msg,
-                platform,
-                client,
-                model_or_pipe,
-                system_message,
-                print_debug=False,
-                msg_history=None,
-                temperature=temperature,
-            )
-            content.append(c)
-            new_msg_history.append(hist)
+        content.append(c)
+        new_msg_history.append(hist)
 
     if print_debug:
         # Just print the first one.
