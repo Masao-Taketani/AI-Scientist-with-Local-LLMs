@@ -10,7 +10,7 @@ import openai
 MAX_NUM_TOKENS = 4096
 
 AVAILABLE_PLATFORMS = [
-    "transformers",
+    "huggingface",
     "ollama"
 ]
 
@@ -73,7 +73,7 @@ def get_response_from_local_llm(
     if msg_history is None:
         msg_history = []
 
-    if 'transformers' in platform:
+    if 'huggingface' in platform:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         prompt = model_or_pipe.tokenizer.apply_chat_template(
             [

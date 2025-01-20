@@ -533,9 +533,13 @@ def check_idea_novelty(
 
 
 if __name__ == "__main__":
-    MAX_NUM_GENERATIONS = 32
-    NUM_REFLECTIONS = 5
     import argparse
+    import torch
+    from transformers import pipeline
+    from ai_scientist.llm import create_client, AVAILABLE_PLATFORMS
+    
+    MAX_NUM_GENERATIONS = 5
+    NUM_REFLECTIONS = 3
 
     parser = argparse.ArgumentParser(description="Generate AI scientist ideas")
     # add type of experiment (nanoGPT, Boston, etc.)
@@ -546,40 +550,69 @@ if __name__ == "__main__":
         help="Experiment to run AI Scientist on.",
     )
     parser.add_argument(
+        "--platform",
+        type=str,
+        default="huggingface",
+        choices=AVAILABLE_PLATFORMS,
+        help="Model platform to use for AI Scientist.",
+    )
+    parser.add_argument(
         "--model",
         type=str,
         default="Qwen/Qwen2.5-72B-Instruct",
-        help="Model to use for AI Scientist.",
+        help="Specify a name of your model to use from available platforms.",
     )
     parser.add_argument(
         "--skip-idea-generation",
         action="store_true",
-        help="Skip idea generation and use existing ideas.",
+        help="Skip idea generation and load existing ideas",
     )
     parser.add_argument(
-        "--check-novelty",
+        "--skip-novelty-check",
         action="store_true",
-        help="Check novelty of ideas.",
+        help="Skip novelty check and use existing ideas",
+    )
+    parser.add_argument(
+        "--engine",
+        type=str,
+        default="openalex",
+        choices=["openalex", "core", "semanticscholar"],
+        help="Scholar engine to use.",
     )
     args = parser.parse_args()
 
-    # Create client
-    client, client_model = create_client(args.model)
+    if args.platform == "huggingface":
+        client = None
+        torch_dtype = torch.float16 if "awq" in args.model.lower() else torch.bfloat16
+        pipe = pipeline("text-generation", 
+                        model=args.model, 
+                        model_kwargs={"torch_dtype": torch_dtype}, 
+                        #device="cuda")
+                        device_map="auto")
+        model_or_pipe = pipe
+    elif args.platform == "ollama":
+        client = create_client(args.platform, args.model)
+        model_or_pipe = args.model
+    else:
+        raise ValueError(f"Platform {platform} not supported.")
 
     base_dir = osp.join("templates", args.experiment)
     results_dir = osp.join("results", args.experiment)
     ideas = generate_ideas(
         base_dir,
-        client=client,
-        model=client_model,
+        args.platform,
+        client,
+        model_or_pipe,
         skip_generation=args.skip_idea_generation,
         max_num_generations=MAX_NUM_GENERATIONS,
         num_reflections=NUM_REFLECTIONS,
     )
-    if args.check_novelty:
+    if not args.skip_novelty_check:
         ideas = check_idea_novelty(
             ideas,
             base_dir=base_dir,
+            platform=args.platform,
             client=client,
-            model_or_pipe=client_model,
+            model_or_pipe=model_or_pipe,
+            engine=args.engine,
         )

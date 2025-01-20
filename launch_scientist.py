@@ -50,7 +50,7 @@ def parse_arguments():
     parser.add_argument(
         "--platform",
         type=str,
-        default="transformers",
+        default="huggingface",
         choices=AVAILABLE_PLATFORMS,
         help="Model platform to use for AI Scientist.",
     )
@@ -325,7 +325,7 @@ if __name__ == "__main__":
     base_dir = osp.join("templates", args.experiment)
     results_dir = osp.join("results", args.experiment)
 
-    if args.platform == "transformers":
+    if args.platform == "huggingface":
         client = None
         torch_dtype = torch.float16 if "awq" in args.model.lower() else torch.bfloat16
         pipe = pipeline("text-generation", 

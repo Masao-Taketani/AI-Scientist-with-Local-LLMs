@@ -77,8 +77,8 @@ export S2_API_KEY="Your Semantic Scholar key"
 ```
 
 ## Supported Platforms and Models
-For this repo, any models from Ollama or transformers are supported to be used as local LLMs. So, pick a platform using `--plaform` argument. 
-E.g. `--platform transformers`.
+For this repo, any models from Ollama or Hugging Face are supported to be used as local LLMs. So, pick a platform between `ollama` and `huggingface` 
+using `--platform` argument. E.g. `--platform huggingface`.
 
 ## Aider
 One of Ollama models is used for Aider. Thus, pick one model from Ollama using `--coder-ollama-model` argument. 
