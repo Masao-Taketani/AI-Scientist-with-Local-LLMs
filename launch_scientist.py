@@ -14,12 +14,11 @@ from aider.models import Model
 from datetime import datetime
 
 from ai_scientist.generate_ideas import generate_ideas, check_idea_novelty
-from ai_scientist.llm import create_client, AVAILABLE_PLATFORMS
+from ai_scientist.llm import AVAILABLE_PLATFORMS, init_client_and_model_or_pipe
 from ai_scientist.perform_experiments import perform_experiments
 from ai_scientist.perform_review import perform_review, load_paper, perform_improvement
 from ai_scientist.perform_writeup import perform_writeup, generate_latex
 
-from transformers import pipeline
 
 NUM_REFLECTIONS = 3
 
@@ -325,20 +324,7 @@ if __name__ == "__main__":
     base_dir = osp.join("templates", args.experiment)
     results_dir = osp.join("results", args.experiment)
 
-    if args.platform == "huggingface":
-        client = None
-        torch_dtype = torch.float16 if "awq" in args.model.lower() else torch.bfloat16
-        pipe = pipeline("text-generation", 
-                        model=args.model, 
-                        model_kwargs={"torch_dtype": torch_dtype}, 
-                        #device="cuda")
-                        device_map="auto")
-        model_or_pipe = pipe
-    elif args.platform == "ollama":
-        client = create_client(args.platform, args.model)
-        model_or_pipe = args.model
-    else:
-        raise ValueError(f"Platform {platform} not supported.")
+    client, model_or_pipe = init_client_and_model_or_pipe(args.platform, args.model)
 
     ideas = generate_ideas(
         base_dir,

@@ -536,7 +536,7 @@ if __name__ == "__main__":
     import argparse
     import torch
     from transformers import pipeline
-    from ai_scientist.llm import create_client, AVAILABLE_PLATFORMS
+    from ai_scientist.llm import AVAILABLE_PLATFORMS, init_client_and_model_or_pipe
     
     MAX_NUM_GENERATIONS = 5
     NUM_REFLECTIONS = 3
@@ -581,20 +581,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if args.platform == "huggingface":
-        client = None
-        torch_dtype = torch.float16 if "awq" in args.model.lower() else torch.bfloat16
-        pipe = pipeline("text-generation", 
-                        model=args.model, 
-                        model_kwargs={"torch_dtype": torch_dtype}, 
-                        #device="cuda")
-                        device_map="auto")
-        model_or_pipe = pipe
-    elif args.platform == "ollama":
-        client = create_client(args.platform, args.model)
-        model_or_pipe = args.model
-    else:
-        raise ValueError(f"Platform {platform} not supported.")
+    client, model_or_pipe = init_client_and_model_or_pipe(args.platform, args.model)
 
     base_dir = osp.join("templates", args.experiment)
     results_dir = osp.join("results", args.experiment)

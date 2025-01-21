@@ -178,11 +178,13 @@ doing academic research, since those take huge GPU resources.
 ## Getting an LLM-Generated Paper Review
 
 ```python
-import openai
+from ai_scientist.llm import init_client_and_model_or_pipe
 from ai_scientist.perform_review import load_paper, perform_review
 
-client = openai.OpenAI()
-model = "gpt-4o-2024-05-13"
+platform = "huggingface" # pick between 'ollama' or 'huggingface'.
+model = "Qwen/Qwen2.5-72B-Instruct" # pick a model for the AI scientist
+
+client, model_or_pipe = init_client_and_model_or_pipe(platform, model)
 
 # Load paper from PDF file (raw text)
 paper_txt = load_paper("report.pdf")
@@ -190,8 +192,9 @@ paper_txt = load_paper("report.pdf")
 # Get the review dictionary
 review = perform_review(
     paper_txt,
-    model,
+    platform,
     client,
+    model_or_pipe,
     num_reflections=5,
     num_fs_examples=1,
     num_reviews_ensemble=5,

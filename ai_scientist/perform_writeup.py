@@ -526,6 +526,7 @@ if __name__ == "__main__":
     from aider.models import Model
     from aider.io import InputOutput
     import json
+    from ai_scientist.llm import AVAILABLE_PLATFORMS, init_client_and_model_or_pipe
 
     parser = argparse.ArgumentParser(description="Perform writeup for a project")
     parser.add_argument("--folder", type=str)
@@ -533,7 +534,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--platform",
         type=str,
-        default="transformers",
+        default="huggingface",
         choices=AVAILABLE_PLATFORMS,
         help="Model platform to use for AI Scientist.",
     )
@@ -544,10 +545,16 @@ if __name__ == "__main__":
         help="Specify a name of your model to use from available platforms.",
     )
     parser.add_argument(
-        "--coder_ollama_model",
+        "--coder-ollama-model",
         type=str,
-        default="qwen2.5-coder:32b-base-fp16",
+        default="qwen2.5-coder:32b-instruct-fp16",
         help="This ollama model is used for Aider to code.",
+    )
+    parser.add_argument(
+        "--edit-format",
+        type=str,
+        default="diff",
+        help="Used for Aider.",
     )
     parser.add_argument(
         "--engine",
@@ -557,9 +564,13 @@ if __name__ == "__main__":
         help="Scholar engine to use.",
     )
     args = parser.parse_args()
+
+    client, model_or_pipe = init_client_and_model_or_pipe(args.platform, args.model)
+    
     print("Make sure you cleaned the Aider logs if re-generating the writeup!")
     folder_name = args.folder
-    idea_name = osp.basename(folder_name)
+    folder_name = folder_name if folder_name[-1] != '/' else folder_name[:-1]
+    idea_name = osp.basename(folder_name) 
     exp_file = osp.join(folder_name, "experiment.py")
     vis_file = osp.join(folder_name, "plot.py")
     notes = osp.join(folder_name, "notes.txt")
@@ -583,12 +594,12 @@ if __name__ == "__main__":
         io=io,
         stream=False,
         use_git=False,
-        edit_format="diff",
+        edit_format=args.edit_format,
     )
     if args.no_writing:
         generate_latex(coder, args.folder, f"{args.folder}/test.pdf")
     else:
         try:
-            perform_writeup(idea, folder_name, coder, args.platform, args.model, engine=args.engine)
+            perform_writeup(idea, folder_name, coder, args.platform, client, model_or_pipe, engine=args.engine)
         except Exception as e:
             print(f"Failed to perform writeup: {e}")

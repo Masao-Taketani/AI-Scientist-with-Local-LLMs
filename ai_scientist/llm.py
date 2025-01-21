@@ -158,3 +158,24 @@ def create_client(platform, model):
         return openai.OpenAI(base_url='http://localhost:11434/v1/',
                              api_key='ollama', # required but ignored
                              )
+
+
+def init_client_and_model_or_pipe(platform, model):
+    if platform == "huggingface":
+        from transformers import pipeline
+        client = None
+        torch_dtype = torch.float16 if "awq" in model.lower() else torch.bfloat16
+        pipe = pipeline("text-generation", 
+                        model=model, 
+                        model_kwargs={"torch_dtype": torch_dtype}, 
+                        #device="cuda")
+                        device_map="auto")
+        model_or_pipe = pipe
+    elif platform == "ollama":
+        from ai_scientist.llm import create_client
+        client = create_client(platform, model)
+        model_or_pipe = model
+    else:
+        raise ValueError(f"Platform {platform} not supported.")
+    
+    return client, model_or_pipe
