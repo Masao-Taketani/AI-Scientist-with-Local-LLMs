@@ -7,7 +7,7 @@ fix the bug. So, if you have your API key for Semantic Scholar API, make sure to
 
 ## Table of Contents
 
-1. [Environment Setup](#introduction)
+1. [Introduction](#introduction)
 2. [Environment Setup](#environment-setup)
    - [Docker](#docker)
    - [Anaconda](#anaconda)
