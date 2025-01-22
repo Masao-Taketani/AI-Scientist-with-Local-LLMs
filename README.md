@@ -1,7 +1,7 @@
 # May the AI Scientist Locally be with You!
 
 > [!WARNING]
-> As for Literature Search APIs, although I set `OpenAlex API` as the default `--engine` argument, there seems to be an error with it. 
+> As for Literature Search APIs, although I set `OpenAlex API` as the default `--engine` argument, there seems to be an error with it (CORE API as well). 
 I've already sent an [issue](https://github.com/SakanaAI/AI-Scientist/issues/179) to the authors. But, it may take a while for them or me to 
 fix the bug. So, if you have your API key for Semantic Scholar API, make sure to use that instead.
 
