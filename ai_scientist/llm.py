@@ -90,8 +90,9 @@ def get_response_from_local_llm(
                                  temperature=temperature,
                                  max_new_tokens=MAX_NUM_TOKENS,
         )
-
         content = response[0]["generated_text"][len(prompt):]
+        if "deepseek-r1" in model_or_pipe.tokenizer.name_or_path.lower(): content = content.split("</think>")[1][2:]
+        print('content:', content)
         new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     elif 'ollama' in platform:
         assert client, "To use an Ollama model, set up the client."
@@ -108,6 +109,7 @@ def get_response_from_local_llm(
             seed=0,
         )
         content = response.choices[0].message.content
+        if "deepseek-r1" in model_or_pipe.lower(): content = content.split("</think>")[1][2:]
         new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     else:
         raise ValueError(f"Platform {platform} not supported.")

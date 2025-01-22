@@ -229,7 +229,7 @@ You should also ensure that the `template.tex` file is updated to use the correc
 
 ### Community-Contributed Templates
 
-We welcome community contributions in the form of new templates. While these are not maintained by us, we are delighted to highlight your templates to others. Below, we list community-contributed templates along with links to their pull requests (PRs):
+The original repo welcomes community contributions in the form of new templates. While these are not maintained by the original repo, they are delighted to highlight community contributors' templates to others. Below, the original repo lists community-contributed templates along with links to their pull requests (PRs):
 
 - Infectious Disease Modeling (`seir`) - [PR #137](https://github.com/SakanaAI/AI-Scientist/pull/137)
 - Image Classification with MobileNetV3 (`mobilenetV3`) - [PR #141](https://github.com/SakanaAI/AI-Scientist/pull/141)
@@ -241,7 +241,7 @@ We welcome community contributions in the form of new templates. While these are
 
 ## Template Resources
 
-We provide three templates, which heavily use code from other repositories, credited below:
+The original repo provides three templates, which heavily use code from other repositories, credited below:
 
 - **NanoGPT Template** uses code from [NanoGPT](https://github.com/karpathy/nanoGPT) and this [PR](https://github.com/karpathy/nanoGPT/pull/254).
 - **2D Diffusion Template** uses code from [tiny-diffusion](https://github.com/tanelp/tiny-diffusion), [ema-pytorch](https://github.com/lucidrains/ema-pytorch), and [Datasaur](https://www.research.autodesk.com/publications/same-stats-different-graphs/).
