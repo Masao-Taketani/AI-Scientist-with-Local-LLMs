@@ -5,6 +5,27 @@
 I've already sent an [issue](https://github.com/SakanaAI/AI-Scientist/issues/179) to the authors. But, it may take a while for them or me to 
 fix the bug. So, if you have your API key for Semantic Scholar API, make sure to use that instead.
 
+## Table of Contents
+
+1. [Environment Setup](#introduction)
+2. [Environment Setup](#environment-setup)
+   - [Docker](#docker)
+   - [Anaconda](#anaconda)
+3. [Literature Search APIs](#literature-search-apis)
+4. [Supported Platforms and Models](#supported-platforms-and-models)
+5. [Aider](#aider)
+6. [Setting Up the Templates](#setting-up-the-templates)
+   - [NanoGPT Template](#nanogpt-template)
+   - [2D Diffusion Template](#2d-diffusion-template)
+   - [Grokking Template](#grokking-template)
+7. [Run AI Scientist Paper Generation Experiments](#run-ai-scientist-paper-generation-experiments)
+8. [Getting an LLM-Generated Paper Review](#getting-an-llm-generated-paper-review)
+9. [Making Your Own Template](#making-your-own-template)
+   - [Community-Contributed Templates](#community-contributed-templates)
+10. [Template Resources](#template-resources)
+11. [Reference](#reference)
+
+## Introduction
 This repository is based on [The AI Scientist](https://github.com/SakanaAI/AI-Scientist), but this repository supports local LLMs models, 
 which the original repo does not. It is especially good if you or your organization has enough GPUs for you to use. Some of possible 
 advantages are as follows.
@@ -17,25 +38,6 @@ Besides, even if you decide to utilize one of the closed LLMs later on, using lo
 before using the closed LLMs, such as how many tokens a LLM would produce in order to solve your problem. 
 - It is also good if you would like to investigate and experiment what kind of outcomes you can expect when you feed your data for internal 
 investigation purpose.
-
-## Table of Contents
-
-1. [Environment Setup](#Environment Setup)
-   - [Docker](#Docker)
-   - [Anaconda](#Anaconda)
-2. [Literature Search APIs](#Literature Search APIs)
-3. [Supported Platforms and Models](#Supported Platforms and Models)
-4. [Aider](#Aider)
-5. [Setting Up the Templates](#setting-up-the-templates)
-   - [NanoGPT Template](#nanogpt-template)
-   - [2D Diffusion Template](#2d-diffusion-template)
-   - [Grokking Template](#grokking-template)
-6. [Run AI Scientist Paper Generation Experiments](#run-ai-scientist-paper-generation-experiments)
-7. [Getting an LLM-Generated Paper Review](#getting-an-llm-generated-paper-review)
-8. [Making Your Own Template](#making-your-own-template)
-   - [Community-Contributed Templates](#community-contributed-templates)
-9. [Template Resources](#template-resources)
-10. [Reference](#Reference)
 
 ## Environment Setup
 
