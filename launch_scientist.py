@@ -60,6 +60,11 @@ def parse_arguments():
         help="Specify a name of your model to use from available platforms.",
     )
     parser.add_argument(
+        "--show-r1-thought",
+        action="store_true",
+        help="This flag can be only used when using DeepSeek R1 models to see the thought process in the standard output. It does not affect the final response they produce.",
+    )
+    parser.add_argument(
         "--coder-ollama-model",
         type=str,
         default="qwen2.5-coder:32b-instruct-fp16",
@@ -129,6 +134,7 @@ def worker(
         improvement,
         edit_format,
         gpu_id,
+        show_r1_thought=False,
 ):
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
     print(f"Worker {gpu_id} started.")
@@ -148,6 +154,7 @@ def worker(
             improvement,
             edit_format,
             log_file=True,
+            show_r1_thought=show_r1_thought,
         )
         print(f"Completed idea: {idea['Name']}, Success: {success}")
     print(f"Worker {gpu_id} finished.")
@@ -165,6 +172,7 @@ def do_idea(
         improvement,
         edit_format,
         log_file=False,
+        show_r1_thought=False,
 ):
     ## CREATE PROJECT FOLDER
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -239,7 +247,7 @@ def do_idea(
                 edit_format=edit_format,
             )
             try:
-                perform_writeup(idea, folder_name, coder, platform, client, model_or_pipe, engine=args.engine)
+                perform_writeup(idea, folder_name, coder, platform, client, model_or_pipe, engine=args.engine, show_r1_thought=show_r1_thought)
             except Exception as e:
                 print(f"Failed to perform writeup: {e}")
                 return False
@@ -262,6 +270,7 @@ def do_idea(
                     num_fs_examples=1,
                     num_reviews_ensemble=5,
                     temperature=0.1,
+                    show_r1_thought=show_r1_thought
                 )
                 # Store the review in separate review.txt file
                 with open(osp.join(folder_name, "review.txt"), "w") as f:
@@ -289,6 +298,7 @@ def do_idea(
                     num_fs_examples=1,
                     num_reviews_ensemble=5,
                     temperature=0.1,
+                    show_r1_thought=show_r1_thought,
                 )
                 # Store the review in separate review.txt file
                 with open(osp.join(folder_name, "review_improved.txt"), "w") as f:
@@ -334,6 +344,7 @@ if __name__ == "__main__":
         skip_generation=args.skip_idea_generation,
         max_num_generations=args.num_ideas,
         num_reflections=NUM_REFLECTIONS,
+        show_r1_thought=args.show_r1_thought,
     )
     if not args.skip_novelty_check:
         ideas = check_idea_novelty(
@@ -343,6 +354,7 @@ if __name__ == "__main__":
             client=client,
             model_or_pipe=model_or_pipe,
             engine=args.engine,
+            show_r1_thought=args.show_r1_thought,
         )
 
     with open(osp.join(base_dir, "ideas.json"), "w") as f:
@@ -374,6 +386,7 @@ if __name__ == "__main__":
                     args.improvement,
                     args.edit_format,
                     gpu_id,
+                    args.show_r1_thought,
                 ),
             )
             p.start()
@@ -403,6 +416,7 @@ if __name__ == "__main__":
                     args.writeup,
                     args.improvement,
                     args.edit_format,
+                    show_r1_thought=args.show_r1_thought,
                 )
                 print(f"Completed idea: {idea['Name']}, Success: {success}")
             except Exception as e:

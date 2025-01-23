@@ -6,6 +6,7 @@ import re
 import shutil
 import subprocess
 from typing import Optional, Tuple
+import logging
 
 from ai_scientist.generate_ideas import search_for_papers
 from ai_scientist.llm import get_response_from_local_llm, extract_json_between_markers, create_client
@@ -294,7 +295,7 @@ This JSON will be automatically parsed, so ensure the format is precise."""
 
 
 def get_citation_aider_prompt(
-        platform, client, model_or_pipe, draft, current_round, total_rounds, engine="semanticscholar"
+        platform, client, model_or_pipe, draft, current_round, total_rounds, engine="semanticscholar", show_r1_thought=False
 ) -> Tuple[Optional[str], bool]:
     msg_history = []
     try:
@@ -307,6 +308,7 @@ def get_citation_aider_prompt(
             model_or_pipe=model_or_pipe,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
+            show_r1_thought=show_r1_thought,
         )
         if "No more citations needed" in text:
             print("No more citations needed.")
@@ -318,7 +320,8 @@ def get_citation_aider_prompt(
         query = json_output["Query"]
         papers = search_for_papers(query, engine=engine)
     except Exception as e:
-        print(f"Error: {e}")
+        #print(f"Error: {e}")
+        logging.exception("An unexpected error just happened.")
         return None, False
 
     if papers is None:
@@ -358,6 +361,7 @@ def get_citation_aider_prompt(
             model_or_pipe=model_or_pipe,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
+            show_r1_thought=show_r1_thought,
         )
         if "Do not add any" in text:
             print("Do not add any.")
@@ -369,6 +373,7 @@ def get_citation_aider_prompt(
         selected_papers = json_output["Selected"]
         selected_papers = str(selected_papers)
 
+        print("selected_papers:", selected_papers)
         # convert to list
         if selected_papers != "[]":
             selected_papers = list(map(int, selected_papers.strip("[]").split(",")))
@@ -381,7 +386,8 @@ def get_citation_aider_prompt(
             return None, False
 
     except Exception as e:
-        print(f"Error: {e}")
+        #print(f"Error: {e}")
+        logging.exception("An unexpected error just happened.")
         return None, False
 
     # Add citation to draft
@@ -408,7 +414,7 @@ Ensure the citation is well-integrated into the text.'''
 
 # PERFORM WRITEUP
 def perform_writeup(
-        idea, folder_name, coder, platform, client, model_or_pipe, num_cite_rounds=20, engine="openalex"
+        idea, folder_name, coder, platform, client, model_or_pipe, num_cite_rounds=20, engine="openalex", show_r1_thought=False,
 ):
     # CURRENTLY ASSUMES LATEX
     abstract_prompt = f"""We've provided the `latex/template.tex` file to the project. We will be filling it in section by section.
@@ -475,7 +481,7 @@ Be sure to first name the file and use *SEARCH/REPLACE* blocks to perform these 
         with open(osp.join(folder_name, "latex", "template.tex"), "r") as f:
             draft = f.read()
         prompt, done = get_citation_aider_prompt(
-            platform, client, model_or_pipe, draft, _, num_cite_rounds, engine=engine
+            platform, client, model_or_pipe, draft, _, num_cite_rounds, engine=engine, show_r1_thought=show_r1_thought,
         )
         if done:
             break

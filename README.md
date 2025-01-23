@@ -2,8 +2,13 @@
 
 > [!WARNING]
 > As for Literature Search APIs, although I set `OpenAlex API` as the default `--engine` argument, there seems to be an error with it (CORE API as well). 
-I've already sent an [issue](https://github.com/SakanaAI/AI-Scientist/issues/179) to the authors. But, it may take a while for them or me to 
-fix the bug. So, if you have your API key for Semantic Scholar API, make sure to use that instead.
+I've already sent an [issue](https://github.com/SakanaAI/AI-Scientist/issues/179) to the authors. But, it may take a while for them or me (I may investigate 
+the issue by myself and may be able to provide the solution) to fix the bug. So, if you have your API key for Semantic Scholar API, make sure to use that instead.
+And even if you don't have a Semantic Scholar API key, you can still try and see what kind of interactions the codebase provide while looking thourh the standard output.
+
+> [!NOTE]
+> This repository accommodates the recently-announced [DeepSeek R1 models](https://github.com/deepseek-ai/DeepSeek-R1) and handles the outputs of their models properly. So, go 
+check them out and see it for yourself how they play out in the acamedic-paper-writing field!
 
 ## Table of Contents
 
@@ -103,8 +108,11 @@ export S2_API_KEY="Your Semantic Scholar key"
 ```
 
 ## Supported Platforms and Models
-For this repo, any models from Ollama or Hugging Face are supported to be used as local LLMs. So, pick a platform between `ollama` and `huggingface` 
-using `--platform` argument. E.g. `--platform huggingface`.
+For this repo, any models from Ollama or Hugging Face, including the recently-announced DeepSeek R1 models, are supported to be used as local LLMs. 
+So, pick a platform between `ollama` and `huggingface` using `--platform` argument. E.g. `--platform huggingface`.
+
+If you'd like to check the thought process when you use one of the DeepSeek R1 models, use a flag called `--show-r1-thought`. That way, you can see the 
+thought process in the standard outout!
 
 ## Aider
 One of Ollama models is used for Aider. Thus, pick one model from Ollama using `--coder-ollama-model` argument. 
@@ -232,6 +240,9 @@ review["Overall"]    # Overall score (1-10)
 review["Decision"]   # 'Accept' or 'Reject'
 review["Weaknesses"] # List of weaknesses (strings)
 ```
+
+> [!CAUTION]
+> I haven't touched `iclr_analysis.py` yet. As soon as I modify it for local models, I am going to upload the program!
 
 To run batch analysis:
 
