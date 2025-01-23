@@ -112,7 +112,7 @@ For this repo, any models from Ollama or Hugging Face, including the recently-an
 So, pick a platform between `ollama` and `huggingface` using `--platform` argument. E.g. `--platform huggingface`.
 
 If you'd like to check the thought process when you use one of the DeepSeek R1 models, use a flag called `--show-r1-thought`. That way, you can see the 
-thought process in the standard outout!
+thought processes in the standard outout!
 
 ## Aider
 One of Ollama models is used for Aider. Thus, pick one model from Ollama using `--coder-ollama-model` argument. 
