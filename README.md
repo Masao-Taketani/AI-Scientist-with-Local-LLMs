@@ -42,7 +42,7 @@ advantages are as follows.
 Besides, even if you decide to utilize one of the closed LLMs later on, using local LLMs first can give you an approximation of the costs 
 before using the closed LLMs, such as how many tokens a LLM would produce in order to solve your problem. 
 - It is also good if you would like to investigate and experiment what kind of outcomes you can expect when you feed your data for internal 
-investigation purpose.
+investigation purposes.
 
 ## Environment Setup
 
