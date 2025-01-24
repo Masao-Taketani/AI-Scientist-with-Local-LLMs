@@ -53,11 +53,11 @@ This repo has prepared two kinds to create execution environments, Docker and An
 
 Follow the installation steps below.
 ```
-git clone https://github.com/Masao-Taketani/AI-Scientist-with-Local-LLMs.git
-cd AI-Scientist-with-Local-LLMs
-
 (Type the following commands at host)
+git clone https://github.com/Masao-Taketani/AI-Scientist-with-Local-LLMs.git
+cd AI-Scientist-with-Local-LLMs/env_setup
 docker build -t ai_scientist .
+cd ..
 docker run -it --rm --gpus '"device=[device id(s)]"' -v .:/work ai_scientist:latest
 
 (Type the following commands after starting the container)
