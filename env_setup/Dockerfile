@@ -18,7 +18,6 @@ RUN pip install aider-chat \
                 pymupdf4llm \
                 transformers \
                 accelerate \
-                datasets \
                 pyalex \
                 jupyter notebook
 
