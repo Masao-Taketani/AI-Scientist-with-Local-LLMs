@@ -1,3 +1,4 @@
+torch
 aider-chat
 autoawq
 backoff
@@ -5,7 +6,6 @@ openai
 matplotlib
 pypdf
 pymupdf4llm
-torch
 transformers
 accelerate
 datasets
