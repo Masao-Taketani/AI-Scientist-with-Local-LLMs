@@ -20,6 +20,7 @@ import argparse
 import os
 import time
 import multiprocessing as mp
+import logging
 from sklearn.utils import shuffle
 from sklearn.metrics import f1_score, roc_auc_score, confusion_matrix
 
@@ -265,7 +266,6 @@ def review_single_paper(
     except Exception as e:
         print(f"Error loading PDF: {e}")
         return {"idx": idx, "review": None}
-
     try:
         llm_review = perform_review(
             text,
@@ -281,7 +281,8 @@ def review_single_paper(
             show_r1_thought=show_r1_thought
         )
     except Exception as e:
-        print(f"Error in worker: {e}")
+        #print(f"Error in worker: {e}")
+        logging.exception("An unexpected error just happened.")
         return {"idx": idx, "review": None}
 
     return {"idx": idx, "review": llm_review}

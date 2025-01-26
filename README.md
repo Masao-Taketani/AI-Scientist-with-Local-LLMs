@@ -241,9 +241,6 @@ review["Decision"]   # 'Accept' or 'Reject'
 review["Weaknesses"] # List of weaknesses (strings)
 ```
 
-> [!CAUTION]
-> I haven't touched `iclr_analysis.py` yet. As soon as I modify it for local models, I am going to upload the program!
-
 To run batch analysis:
 
 ```bash
