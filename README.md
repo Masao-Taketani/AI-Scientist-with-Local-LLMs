@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-<img src="docs/ai_scientist_with_boy.jpg"><img src="docs/ai_scientist_with_girl.jpg">
+<img src="docs/ai_scientist_with_boy.jpg" width=340px height=192px ><img src="docs/ai_scientist_with_girl.jpg" width=340px height=192px >
 </p>
 
 > [!WARNING]
