@@ -1,5 +1,13 @@
 # May the AI Scientist Locally be with You!
 
+<p align="center">
+  <img src="docs/title.jpg">
+</p>
+
+<p align="center">
+<img src="docs/ai_scientist_with_boy.jpg"><img src="docs/ai_scientist_with_girl.jpg">
+</p>
+
 > [!WARNING]
 > As for Literature Search APIs, although I set `OpenAlex API` as the default `--engine` argument, there seems to be an error with it (CORE API as well). 
 I've already sent an [issue](https://github.com/SakanaAI/AI-Scientist/issues/179) to the authors. But, it may take a while for them or me (I may investigate 
