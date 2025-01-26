@@ -111,7 +111,7 @@ export S2_API_KEY="Your Semantic Scholar key"
 For this repo, any models from Ollama or Hugging Face, including the recently-announced DeepSeek R1 models, are supported to be used as local LLMs. 
 So, pick a platform between `ollama` and `huggingface` using `--platform` argument. E.g. `--platform huggingface`.
 
-If you'd like to check the thought process when you use one of the DeepSeek R1 models, use a flag called `--show-r1-thought`. That way, you can see the 
+If you'd like to check thought processes when you use one of the DeepSeek R1 models, use a flag named `--show-r1-thought`. That way, you can see the 
 thought processes in the standard outout!
 
 ## Aider
