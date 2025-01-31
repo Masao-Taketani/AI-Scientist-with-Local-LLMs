@@ -499,9 +499,6 @@ def check_idea_novelty(
                     ## SEARCH FOR PAPERS
                     query = json_output["Query"]
                     papers = search_for_papers(query, result_limit=10, engine=engine)
-                    #print("##############################[papers]#############################")
-                    #print(type(papers[0]))
-                    #print(papers[0])
                     if papers is None:
                         papers_str = "No papers found."
 
