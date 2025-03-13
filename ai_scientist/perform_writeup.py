@@ -295,7 +295,7 @@ This JSON will be automatically parsed, so ensure the format is precise."""
 
 
 def get_citation_aider_prompt(
-        platform, client, model_or_pipe, draft, current_round, total_rounds, engine="semanticscholar", show_r1_thought=False
+        platform, client, model_or_pipe, draft, current_round, total_rounds, engine="semanticscholar", show_thought=False
 ) -> Tuple[Optional[str], bool]:
     msg_history = []
     try:
@@ -308,7 +308,7 @@ def get_citation_aider_prompt(
             model_or_pipe=model_or_pipe,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
-            show_r1_thought=show_r1_thought,
+            show_thought=show_thought,
         )
         if "No more citations needed" in text:
             print("No more citations needed.")
@@ -361,7 +361,7 @@ def get_citation_aider_prompt(
             model_or_pipe=model_or_pipe,
             system_message=citation_system_msg.format(total_rounds=total_rounds),
             msg_history=msg_history,
-            show_r1_thought=show_r1_thought,
+            show_thought=show_thought,
         )
         if "Do not add any" in text:
             print("Do not add any.")
@@ -414,7 +414,7 @@ Ensure the citation is well-integrated into the text.'''
 
 # PERFORM WRITEUP
 def perform_writeup(
-        idea, folder_name, coder, platform, client, model_or_pipe, num_cite_rounds=20, engine="openalex", show_r1_thought=False,
+        idea, folder_name, coder, platform, client, model_or_pipe, num_cite_rounds=20, engine="openalex", show_thought=False,
 ):
     # CURRENTLY ASSUMES LATEX
     abstract_prompt = f"""We've provided the `latex/template.tex` file to the project. We will be filling it in section by section.
@@ -481,7 +481,7 @@ Be sure to first name the file and use *SEARCH/REPLACE* blocks to perform these 
         with open(osp.join(folder_name, "latex", "template.tex"), "r") as f:
             draft = f.read()
         prompt, done = get_citation_aider_prompt(
-            platform, client, model_or_pipe, draft, _, num_cite_rounds, engine=engine, show_r1_thought=show_r1_thought,
+            platform, client, model_or_pipe, draft, _, num_cite_rounds, engine=engine, show_thought=show_thought,
         )
         if done:
             break

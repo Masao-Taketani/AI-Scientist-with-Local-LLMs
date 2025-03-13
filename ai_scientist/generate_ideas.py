@@ -81,7 +81,7 @@ def generate_ideas(
         skip_generation=False,
         max_num_generations=20,
         num_reflections=5,
-        show_r1_thought=False,
+        show_thought=False,
 ):
     if skip_generation:
         # Load existing ideas from file
@@ -131,7 +131,7 @@ def generate_ideas(
                 model_or_pipe=model_or_pipe,
                 system_message=idea_system_prompt,
                 msg_history=msg_history,
-                show_r1_thought=show_r1_thought,
+                show_thought=show_thought,
             )
             ## PARSE OUTPUT
             json_output = extract_json_between_markers(text)
@@ -151,7 +151,7 @@ def generate_ideas(
                         model_or_pipe=model_or_pipe,
                         system_message=idea_system_prompt,
                         msg_history=msg_history,
-                        show_r1_thought=show_r1_thought,
+                        show_thought=show_thought,
                     )
                     ## PARSE OUTPUT
                     json_output = extract_json_between_markers(text)
@@ -189,7 +189,7 @@ def generate_next_idea(
         prev_idea_archive=[],
         num_reflections=5,
         max_attempts=10,
-        show_r1_thought=False,
+        show_thought=False,
 ):
     idea_archive = prev_idea_archive
     original_archive_size = len(idea_archive)
@@ -236,7 +236,7 @@ Scores of 0 indicate the idea failed either during experimentation, writeup or r
                     model_or_pipe=model_or_pipe,
                     system_message=idea_system_prompt,
                     msg_history=msg_history,
-                    show_r1_thought=show_r1_thought,
+                    show_thought=show_thought,
                 )
                 ## PARSE OUTPUT
                 json_output = extract_json_between_markers(text)
@@ -256,7 +256,7 @@ Scores of 0 indicate the idea failed either during experimentation, writeup or r
                             model_or_pipe=model_or_pipe,
                             system_message=idea_system_prompt,
                             msg_history=msg_history,
-                            show_r1_thought=show_r1_thought,
+                            show_thought=show_thought,
                         )
                         ## PARSE OUTPUT
                         json_output = extract_json_between_markers(text)
@@ -443,7 +443,7 @@ def check_idea_novelty(
         model_or_pipe,
         max_num_iterations=10,
         engine="openalex",
-        show_r1_thought=False,
+        show_thought=False,
 ):
     with open(osp.join(base_dir, "experiment.py"), "r") as f:
         code = f.read()
@@ -483,7 +483,7 @@ def check_idea_novelty(
                             code=code,
                         ),
                         msg_history=msg_history,
-                        show_r1_thought=show_r1_thought,
+                        show_thought=show_thought,
                     )
                     if "decision made: novel" in text.lower():
                         print("Decision made: novel after round", j)

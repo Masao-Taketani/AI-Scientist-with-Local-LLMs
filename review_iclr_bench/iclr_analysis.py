@@ -236,7 +236,7 @@ def review_single_paper(
     platform,
     client,
     model_or_pipe,
-    show_r1_thought,
+    show_thought,
     idx,
     ore_ratings,
     llm_ratings,
@@ -278,7 +278,7 @@ def review_single_paper(
             temperature,
             reviewer_system_prompt=reviewer_system_prompt,
             review_instruction_form=review_instruction_form,
-            show_r1_thought=show_r1_thought
+            show_thought=show_thought
         )
     except Exception as e:
         #print(f"Error in worker: {e}")
@@ -291,7 +291,7 @@ def review_single_paper(
 def worker(
     platform,
     model,
-    show_r1_thought,
+    show_thought,
     input_queue,
     output_queue,
 ):
@@ -301,7 +301,7 @@ def worker(
         inputs = input_queue.get()
         if inputs is None:
             break
-        result = review_single_paper(platform, client, model_or_pipe, show_r1_thought, *inputs)
+        result = review_single_paper(platform, client, model_or_pipe, show_thought, *inputs)
         output_queue.put(result)
 
 
@@ -309,7 +309,7 @@ def open_review_validate(
     num_reviews,
     platform,
     model,
-    show_r1_thought,
+    show_thought,
     rating_fname,
     batch_size,
     num_reflections,
@@ -351,7 +351,7 @@ def open_review_validate(
         output_queue = mp.Queue()
         processes = []
         for _ in range(batch_size):
-            p = mp.Process(target=worker, args=(platform, model, show_r1_thought, input_queue, output_queue))
+            p = mp.Process(target=worker, args=(platform, model, show_thought, input_queue, output_queue))
             p.start()
             processes.append(p)
 
@@ -457,7 +457,7 @@ if __name__ == "__main__":
         args.num_reviews,
         args.platform,
         args.model,
-        args.show_r1_thought,
+        args.show_thought,
         rating_fname,
         args.batch_size,
         args.num_reflections,

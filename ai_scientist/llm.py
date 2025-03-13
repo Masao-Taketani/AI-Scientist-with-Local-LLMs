@@ -1,7 +1,6 @@
 import json
 import os
 import re
-#import backoff
 import torch
 from transformers import set_seed
 import openai
@@ -13,6 +12,8 @@ AVAILABLE_PLATFORMS = [
     "huggingface",
     "ollama"
 ]
+
+THINK_MODEL_KEYWORDS = ["deepseek-r1", "qwq"]
 
 
 # Get N responses from a single message, used for ensembling.
@@ -27,7 +28,7 @@ def get_batch_responses_from_local_llm(
         msg_history=None,
         temperature=0.75,
         n_responses=1,
-        show_r1_thought=False
+        show_thought=False
 ):
     if msg_history is None:
         msg_history = []
@@ -43,7 +44,7 @@ def get_batch_responses_from_local_llm(
             print_debug=False,
             msg_history=None,
             temperature=temperature,
-            show_r1_thought=show_r1_thought,
+            show_thought=show_thought,
         )
         content.append(c)
         new_msg_history.append(hist)
@@ -71,7 +72,7 @@ def get_response_from_local_llm(
         print_debug=False,
         msg_history=None,
         temperature=0.75,
-        show_r1_thought=False,
+        show_thought=False,
 ):
     if msg_history is None:
         msg_history = []
@@ -94,13 +95,13 @@ def get_response_from_local_llm(
                                  max_new_tokens=MAX_NUM_TOKENS,
         )
         content = response[0]["generated_text"][len(prompt):]
-        if "deepseek-r1" in model_or_pipe.tokenizer.name_or_path.lower(): 
+        if any([keyword in model_or_pipe.tokenizer.name_or_path.lower() for keyword in THINK_MODEL_KEYWORDS]):
             thought, content = content.split("</think>")
             content = content[2:]
-            if show_r1_thought:
-                print("\n\n[DeepSeek R1's thought process starts here]")
-                print(thought.split("<think>")[1][1:])
-                print("[DeepSeek R1's thought process ends here]\n\n")
+            if show_thought:
+                print("\n\n[Showing thought process STARTs here]")
+                print(thought.split("<think>")[1][1:]) if thought.startswith("<think>") else print(thought)
+                print("[Showing thought process ENDs here]\n\n")
         new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     elif 'ollama' in platform:
         assert client, "To use an Ollama model, set up the client."
@@ -117,13 +118,13 @@ def get_response_from_local_llm(
             seed=0,
         )
         content = response.choices[0].message.content
-        if "deepseek-r1" in model_or_pipe.lower(): 
+        if any([keyword in model_or_pipe.lower() for keyword in THINK_MODEL_KEYWORDS]):
             thought, content = content.split("</think>")
             content = content[2:]
-            if show_r1_thought:
-                print("\n\n[DeepSeek R1's thought process starts here]")
-                print(thought.split("<think>")[1][1:])
-                print("[DeepSeek R1's thought process ends here]\n\n")
+            if show_thought:
+                print("\n\n[Showing thought process STARTs here]")
+                print(thought.split("<think>")[1][1:]) if thought.startswith("<think>") else print(thought)
+                print("[Showing thought process ENDs here]\n\n")
         new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     else:
         raise ValueError(f"Platform {platform} not supported.")

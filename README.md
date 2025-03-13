@@ -15,7 +15,7 @@ the issue by myself and may be able to provide the solution) to fix the bug. So,
 And even if you don't have a Semantic Scholar API key, you can still try and see what kind of interactions the codebase provide while looking thourh the standard output.
 
 > [!NOTE]
-> This repository accommodates the recently-announced [DeepSeek R1 models](https://github.com/deepseek-ai/DeepSeek-R1) and handles the outputs of their models properly. So, go 
+> This repository accommodates the recently announced reasoning models, such as [**DeepSeek R1**](https://github.com/deepseek-ai/DeepSeek-R1) and [**QwQ**](https://qwenlm.github.io/blog/qwq-32b/), and handles the outputs of those models properly. So, go 
 check them out and see it for yourself how they play out in the acamedic-paper-writing field!
 
 ## Table of Contents
@@ -113,10 +113,10 @@ export S2_API_KEY="Your Semantic Scholar key"
 ```
 
 ## Supported Platforms and Models
-For this repo, any models from Ollama or Hugging Face, including the recently-announced DeepSeek R1 models, are supported to be used as local LLMs. 
+For this repo, any models from Ollama and Hugging Face, including the recently announced reasoning models such as [**DeepSeek R1**](https://github.com/deepseek-ai/DeepSeek-R1) and [**QwQ**](https://qwenlm.github.io/blog/qwq-32b/), are supported to be used as local LLMs. 
 So, pick a platform between `ollama` and `huggingface` using `--platform` argument. E.g. `--platform huggingface`.
 
-If you'd like to check thought processes when you use one of the DeepSeek R1 models, use a flag named `--show-r1-thought`. That way, you can see the 
+If you'd like to check thought processes when you use one of the reasoning models, use a flag named `--show-thought`. That way, you can see the 
 thought processes in the standard outout!
 
 ## Aider
